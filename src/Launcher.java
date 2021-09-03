@@ -1,7 +1,7 @@
 
-package interfaz;
-
 import java.awt.EventQueue;
+
+import interfaz.JFramePrincipal;
 
 public class Launcher {
 	

@@ -3,9 +3,7 @@ package interfaz;
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 import javax.swing.JLabel;
 import java.awt.Font;
 import javax.swing.JList;
@@ -13,8 +11,7 @@ import javax.swing.ListSelectionModel;
 import javax.swing.JRadioButton;
 import javax.swing.border.TitledBorder;
 import javax.swing.JTextPane;
-import java.awt.Canvas;
-import java.awt.Color;
+import java.awt.Label;
 
 @SuppressWarnings("serial")
 public class JFramePrincipal extends JFrame{
@@ -40,7 +37,13 @@ public class JFramePrincipal extends JFrame{
 	private JTextPane textPane;
 	
 	private JPanel panelMemoria;
-	private Canvas cvsMemoria;
+	private Label lblTitulo;
+	private JLabel lblMemoriaPrincipalpal;
+	private PanelDibujoMem dibujoMemoria;
+	private PanelDibujoProc dibujoProcesos;
+	private JLabel lblMemoriaLibre;
+	private JLabel lblKB;
+
 	
 	public JFramePrincipal() {
 		setTitle("Simulador Gestor de Memoria");
@@ -54,13 +57,14 @@ public class JFramePrincipal extends JFrame{
 		
 		//Panel de seleccion de procesos
 		panelProcesos = new JPanel();
+		panelProcesos.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panelProcesos.setBounds(10, 10, 180, 350);
 		panelPrincipal.add(panelProcesos);
 		panelProcesos.setLayout(null);
 		
 		lblProcesos = new JLabel("Procesos");
 		lblProcesos.setFont(new Font("Tahoma", Font.BOLD, 12));
-		lblProcesos.setBounds(10, 10, 70, 13);
+		lblProcesos.setBounds(10, 50, 70, 13);
 		panelProcesos.add(lblProcesos);
 		
 		String procesos[] = { "VLC Player (6MB)", "Chrome (5MB)", 
@@ -69,7 +73,7 @@ public class JFramePrincipal extends JFrame{
 		listaProcesos = new JList(procesos);
 		listaProcesos.setFont(new Font("Tahoma", Font.PLAIN, 10));
 		listaProcesos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		listaProcesos.setBounds(10, 33, 160, 307);
+		listaProcesos.setBounds(10, 70, 160, 270);
 		panelProcesos.add(listaProcesos);
 		
 		//Panel Modelos de Memoria
@@ -124,18 +128,46 @@ public class JFramePrincipal extends JFrame{
 		panelMensajes.setLayout(null);
 		
 		textPane = new JTextPane();
-		textPane.setBounds(10, 20, 366, 153);
+		textPane.setEditable(false);
+		textPane.setBounds(15, 25, 356, 143);
 		panelMensajes.add(textPane);
 		
+		//Panel Grafico Memoria
 		panelMemoria = new JPanel();
+		panelMemoria.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panelMemoria.setBounds(200, 10, 576, 350);
 		panelPrincipal.add(panelMemoria);
 		panelMemoria.setLayout(null);
 		
-		cvsMemoria = new Canvas();
-		cvsMemoria.setBounds(54, 10, 100, 149);
-		panelMemoria.add(cvsMemoria);
-		cvsMemoria.setBackground(Color.green);
+		lblTitulo = new Label("Titulo");
+		lblTitulo.setFont(new Font("Dialog", Font.BOLD, 16));
+		lblTitulo.setAlignment(Label.CENTER);
+		lblTitulo.setBounds(5, 5, 566, 29);
+		panelMemoria.add(lblTitulo);
+		
+		dibujoMemoria = new PanelDibujoMem();
+		panelMemoria.add(dibujoMemoria);
+		dibujoMemoria.setBounds(45, 45, 80, 150);
+		
+		dibujoProcesos = new PanelDibujoProc();
+		panelMemoria.add(dibujoProcesos);
+		dibujoProcesos.setBounds(25, 230, 531, 80);
+		
+		lblMemoriaPrincipalpal = new JLabel("Memoria Principal");
+		lblMemoriaPrincipalpal.setBounds(25, 207, 126, 13);
+		panelMemoria.add(lblMemoriaPrincipalpal);
+		
+		lblMemoriaLibre = new JLabel("Memoria Libre");
+		lblMemoriaLibre.setBounds(135, 45, 115, 13);
+		panelMemoria.add(lblMemoriaLibre);
+		
+		lblKB = new JLabel("KB");
+		lblKB.setBounds(135, 68, 45, 13);
+		panelMemoria.add(lblKB);
+		
 
 	}
+	
+	
+	
 }
