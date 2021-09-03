@@ -31,14 +31,14 @@ public class ParticionesEstFijas {
 		imprimir();
 		
 		
-		Proceso proc1 = new Proceso(1, "Prueba", 980, new Color(215, 215, 84));
+		Proceso proc1 = new Proceso(1, "Prueba", 980, new Color(215, 153, 84));
 		añadirProceso(proc1, 3);
 		System.out.println("---");
 		imprimir();
 		
-		eliminarProceso(1);
+		/*eliminarProceso(1);
 		System.out.println("---");
-		imprimir();
+		imprimir();*/
 		
 	}
 	
@@ -117,6 +117,12 @@ public class ParticionesEstFijas {
 		
 	}
 	
+	
+	/**
+	 * Eliminar proceso
+	 * @param PID
+	 * @return verdadero si se realia el proceso
+	 */
 	public boolean eliminarProceso(int PID) {
 		for(int i=1; i<particiones.length; i++) {
 			if(particiones[i].getProceso().getPID() == PID ) {
@@ -127,6 +133,7 @@ public class ParticionesEstFijas {
 		}
 		return false;	
 	}
+	
 	
 	public void imprimir() {
 		for(int i=0; i<particiones.length; i++) {

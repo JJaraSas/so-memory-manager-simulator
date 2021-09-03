@@ -9,9 +9,15 @@ import java.awt.Font;
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
 import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
+
+import logica.ProcesosDisponibles;
+
 import javax.swing.JTextPane;
 import java.awt.Label;
+import javax.swing.SwingConstants;
+import javax.swing.JToggleButton;
 
 @SuppressWarnings("serial")
 public class JFramePrincipal extends JFrame{
@@ -19,8 +25,9 @@ public class JFramePrincipal extends JFrame{
 	private JPanel panelPrincipal;
 	
 	private JPanel panelProcesos;
+	private JScrollPane scrollLista;
 	private JList<String> listaProcesos;
-	private JLabel lblProcesos;
+	private JLabel lblProcesosDisp;
 	
 	private JPanel panelModMemoria;
 	private ButtonGroup btgModMemoria;
@@ -43,6 +50,7 @@ public class JFramePrincipal extends JFrame{
 	private PanelDibujoProc dibujoProcesos;
 	private JLabel lblMemoriaLibre;
 	private JLabel lblKB;
+	private JToggleButton tglbtnON_OFF;
 
 	
 	public JFramePrincipal() {
@@ -56,25 +64,29 @@ public class JFramePrincipal extends JFrame{
 		panelPrincipal.setLayout(null);
 		
 		//Panel de seleccion de procesos
+		tglbtnON_OFF = new JToggleButton("Iniciar");
+		tglbtnON_OFF.setBounds(33, 10, 115, 21);
+		panelProcesos.add(tglbtnON_OFF);
+		
 		panelProcesos = new JPanel();
 		panelProcesos.setBorder(new TitledBorder(null, "", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panelProcesos.setBounds(10, 10, 180, 350);
 		panelPrincipal.add(panelProcesos);
 		panelProcesos.setLayout(null);
 		
-		lblProcesos = new JLabel("Procesos");
-		lblProcesos.setFont(new Font("Tahoma", Font.BOLD, 12));
-		lblProcesos.setBounds(10, 50, 70, 13);
-		panelProcesos.add(lblProcesos);
+		lblProcesosDisp = new JLabel("Procesos Disponibles");
+		lblProcesosDisp.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblProcesosDisp.setBounds(10, 50, 160, 13);
+		panelProcesos.add(lblProcesosDisp);
 		
-		String procesos[] = { "VLC Player (6MB)", "Chrome (5MB)", 
-							  "Word (4MB)", "Excel (3MB)", "Eclipse (2MB)", 
-							  "Solitario (1MB)", "PDFReader (512KB)"};
-		listaProcesos = new JList(procesos);
+		listaProcesos = new JList(generarListaProcesos());
 		listaProcesos.setFont(new Font("Tahoma", Font.PLAIN, 10));
 		listaProcesos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		listaProcesos.setBounds(10, 70, 160, 270);
-		panelProcesos.add(listaProcesos);
+		
+		scrollLista = new JScrollPane();
+		scrollLista.setViewportView(listaProcesos);
+		scrollLista.setBounds(10, 70, 160, 131);
+		panelProcesos.add(scrollLista);
 		
 		//Panel Modelos de Memoria
 		panelModMemoria = new JPanel();
@@ -164,10 +176,19 @@ public class JFramePrincipal extends JFrame{
 		lblKB = new JLabel("KB");
 		lblKB.setBounds(135, 68, 45, 13);
 		panelMemoria.add(lblKB);
-		
-
 	}
 	
-	
-	
+	public String[] generarListaProcesos() {
+		ProcesosDisponibles procesosDisponibles= new ProcesosDisponibles();
+		
+		String listaProcesos[] = new String[procesosDisponibles.getDisponibles().length];
+		
+		for (int i = 0; i < listaProcesos.length; i++ ) {
+			listaProcesos[i] = procesosDisponibles.getDisponibles()[i].getNombre() 
+							   + " ("+ procesosDisponibles.getDisponibles()[i].getTamano()
+							   + "KB) ";
+		}
+		
+		return listaProcesos;
+	}
 }

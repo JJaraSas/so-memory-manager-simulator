@@ -43,4 +43,12 @@ public class Proceso {
 	public void setTamano(int tamano) {
 		this.tamano = tamano;
 	}
+
+	public Color getColor() {
+		return color;
+	}
+
+	public void setColor(Color color) {
+		this.color = color;
+	}
 }
