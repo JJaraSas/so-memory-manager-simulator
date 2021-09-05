@@ -5,9 +5,14 @@ import java.awt.Color;
 public class ParticionesEstFijas {
 	
 	//Constructor por defecto
-	public ParticionesEstFijas() {
+	public ParticionesEstFijas(int asignacion) {
 		dividirMemoria();
 	}
+	
+	//Contador que permite asignar PID a cada proceso
+	int contadorPID = 1;
+	//Metodo de asignacion
+	int asignacion = 0;
 	
 	//Definicion de tamaño de la memoria, el sistema operativo
 	//y de las particiones
@@ -27,15 +32,14 @@ public class ParticionesEstFijas {
 			particiones[i]= new Particion(i, true, tamanoParticion, null, 
 										  particiones[i-1].getInicio()+particiones[i-1].getTamano());
 		}
-				
+			
+		/*
 		imprimir();
-		
-		
 		Proceso proc1 = new Proceso(1, "Prueba", 980, new Color(215, 153, 84));
 		añadirProceso(proc1, 3);
 		System.out.println("---");
 		imprimir();
-		
+		*/
 		/*eliminarProceso(1);
 		System.out.println("---");
 		imprimir();*/
@@ -45,15 +49,16 @@ public class ParticionesEstFijas {
 	/**
 	 * Añade los procesos a matriz memoria:
 	 * @param proceso
-	 * @param metodo
+	 * @param asignacion:
 	 *  1-Primer ajuste | 2-Mejor ajuste | 3-Peor Ajuste
 	 */
-	public boolean añadirProceso(Proceso proceso, int metodo) {
+	public boolean añadirProceso(Proceso proceso, int asignacion) {
 		
 		int posicion = 0;
+		proceso.setPID(contadorPID);
 		
 		//Primer ajuste: Asignar el primer fragmento libre que tenga el tamaño suficiente.
-		if(metodo==1){									
+		if(asignacion==1){									
 			for(int i=1; i<particiones.length; i++) {
 				if(particiones[i].getDisponible() == true & particiones[i].getTamano() >= proceso.getTamano() ) {
 					posicion = i;
@@ -63,6 +68,8 @@ public class ParticionesEstFijas {
 			if(posicion != 0) {
 				particiones[posicion].setProceso(proceso);
 				particiones[posicion].setDisponible(false);
+				contadorPID++;
+				imprimir();					//*************************
 				return true;
 			}else {
 				return false;
@@ -70,7 +77,7 @@ public class ParticionesEstFijas {
 		}
 		
 		//Mejor ajuste: Asignar el fragmento más pequeño que tenga el tamaño suficiente.
-		if(metodo==2){									
+		if(asignacion==2){									
 			for(int i=1; i<particiones.length; i++) {
 				if(particiones[i].getDisponible() == true & particiones[i].getTamano() >= proceso.getTamano() ) {
 					if(posicion != 0) {
@@ -85,6 +92,7 @@ public class ParticionesEstFijas {
 			if(posicion != 0) {
 				particiones[posicion].setProceso(proceso);
 				particiones[posicion].setDisponible(false);
+				contadorPID++;
 				return true;
 			}else {
 				return false;
@@ -92,7 +100,7 @@ public class ParticionesEstFijas {
 		}		
 		
 		//Peor ajuste: Asignar el fragmento más grande.
-		if(metodo==3){									
+		if(asignacion==3){									
 			for(int i=1; i<particiones.length; i++) {
 				if(particiones[i].getDisponible() == true & particiones[i].getTamano() >= proceso.getTamano() ) {
 					if(posicion != 0) {
@@ -107,6 +115,7 @@ public class ParticionesEstFijas {
 			if(posicion != 0) {
 				particiones[posicion].setProceso(proceso);
 				particiones[posicion].setDisponible(false);
+				contadorPID++;
 				return true;
 			}else {
 				return false;
@@ -124,11 +133,16 @@ public class ParticionesEstFijas {
 	 * @return verdadero si se realia el proceso
 	 */
 	public boolean eliminarProceso(int PID) {
+		
+		System.out.println(particiones.length);
 		for(int i=1; i<particiones.length; i++) {
-			if(particiones[i].getProceso().getPID() == PID ) {
-				particiones[i].setDisponible(true);
-				particiones[i].setProceso(null);
-				break;
+			if(particiones[i].getDisponible() == false) {
+				if(particiones[i].getProceso().getPID() == PID) {
+					particiones[i].setDisponible(true);
+					particiones[i].setProceso(null);
+					imprimir();
+					return true;	
+				}
 			}
 		}
 		return false;	
