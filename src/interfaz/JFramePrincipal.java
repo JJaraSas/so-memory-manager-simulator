@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import javax.swing.JToggleButton;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 
 @SuppressWarnings("serial")
 public class JFramePrincipal extends JFrame implements ActionListener{
@@ -35,7 +36,8 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	private String activos [];			//Lita de procesos activos
 	private int modelo = 1;				//Modelo seleccionado
 	private int asignacion = 1;			//Algoritmos de asignacion
-	private int tamOcupado = 0;
+	private int tamOcupado = 0;			//label tamaño ocupado
+	private boolean compactacion = false;	//Compactacion activa/no activa
 	
 	private JPanel panelPrincipal;
 	
@@ -49,12 +51,14 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	private ButtonGroup btgModMemoria;
 	private JRadioButton rdbtnPEstaticaFijas;
 	private JRadioButton rdbtnPEstaticasVariables;
+	private JRadioButton rdbtnPDinamicas;
 	
 	private JPanel panelAsignacion;
 	private ButtonGroup btgAsignacion;
 	private JRadioButton rdbtnPrimerAjuste;
 	private JRadioButton rdbtnMejorAjuste;
 	private JRadioButton rdbtnPeorAjuste;
+	private JCheckBox chckbxCompactacion;
 	
 	private JPanel panelMensajes;
 	private JTextPane textMensajes;
@@ -124,16 +128,26 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		
 		rdbtnPEstaticaFijas = new JRadioButton("<html>Particiones estaticas<br />fijas</html>");
 		rdbtnPEstaticaFijas.setSelected(true);
-		rdbtnPEstaticaFijas.setBounds(10, 24, 152, 35);
+		rdbtnPEstaticaFijas.setBounds(10, 24, 152, 29);
 		panelModMemoria.add(rdbtnPEstaticaFijas);
 		
 		rdbtnPEstaticasVariables = new JRadioButton("<html>Particiones estaticas<br />variables</html>");
-		rdbtnPEstaticasVariables.setBounds(10, 61, 152, 35);
+		rdbtnPEstaticasVariables.setBounds(10, 55, 152, 29);
 		panelModMemoria.add(rdbtnPEstaticasVariables);
+		
+		rdbtnPDinamicas = new JRadioButton("Particiones Dinamicas");
+		rdbtnPDinamicas.setBounds(10, 86, 152, 21);
+		panelModMemoria.add(rdbtnPDinamicas);
+		
+		chckbxCompactacion = new JCheckBox("Compactaci\u00F3n");
+		chckbxCompactacion.setFont(new Font("Tahoma", Font.PLAIN, 11));
+		chckbxCompactacion.setBounds(35, 109, 127, 21);
+		panelModMemoria.add(chckbxCompactacion);
 		
 		btgModMemoria = new ButtonGroup();
 		btgModMemoria.add(rdbtnPEstaticaFijas);
 		btgModMemoria.add(rdbtnPEstaticasVariables);
+		btgModMemoria.add(rdbtnPDinamicas);
 		
 		//Panel Algoritmo Asignacion
 		panelAsignacion = new JPanel();
@@ -262,7 +276,7 @@ public class JFramePrincipal extends JFrame implements ActionListener{
             		modelo = 1;
             	else if(rdbtnPEstaticasVariables.isSelected())
             		modelo = 2;
-            	else
+            	else if(rdbtnPDinamicas.isSelected())
             		modelo = 3;
             	
             	//Metodo de asignacion
@@ -272,16 +286,17 @@ public class JFramePrincipal extends JFrame implements ActionListener{
             		asignacion = 2;
             	else if(rdbtnPeorAjuste.isSelected())
             		asignacion = 3;
-            	else
-            		asignacion = 0;		//no utiliza modelo (particiones dinamicas)
+            	
+            	//Compactacion
+            	compactacion = chckbxCompactacion.isSelected();
             	
             	//Segun modelo seleccionado se asigna el titulo
             	if(modelo == 1) {
             		lblTitulo.setText("Particiones Estaticas Fijas");
             	}else if(modelo == 2) {
             		lblTitulo.setText("Particiones Estaticas Variables");
-            	}else {
-            		//modelo = 3;
+            	}else if(modelo == 3){
+            		lblTitulo.setText("Particiones Dinamicas");
             	}
             	
             	desabilitarIniciado();
@@ -329,9 +344,9 @@ public class JFramePrincipal extends JFrame implements ActionListener{
             		agregado = dibujoProcesos.getParticionesEstFijas().añadirProceso(proceso, asignacion);
             	}else if(modelo == 2) {
             		agregado = dibujoProcesos.getParticionesEstVariables().añadirProceso(proceso, asignacion);
-            		dibujoProcesos.getParticionesEstVariables().imprimir();	//******
             	}else {
-            		//modelo = 3;
+            		agregado = dibujoProcesos.getParticionesDinamicas().añadirProceso(proceso, asignacion);
+            		dibujoProcesos.getParticionesDinamicas().imprimir();
             	}
             	
             	if(agregado)
@@ -401,8 +416,10 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		//Generar lista de procesos activos a partir de las particiones
 		if(modelo == 1)
 			activos = generarListaActivos(dibujoProcesos.getParticionesEstFijas().getParticiones());
-		else
+		else if (modelo == 2)
 			activos = generarListaActivos(dibujoProcesos.getParticionesEstVariables().getParticiones());
+		else if (modelo == 3)
+			activos = generarListaActivos(dibujoProcesos.getParticionesDinamicas().getParticiones());
 	}
 	
 	/**
@@ -447,6 +464,8 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	public void desabilitarIniciado() {
 		rdbtnPEstaticaFijas.setEnabled(false);
 		rdbtnPEstaticasVariables.setEnabled(false);
+		rdbtnPDinamicas.setEnabled(false);
+		chckbxCompactacion.setEnabled(false);
 		
 		rdbtnPrimerAjuste.setEnabled(false);
 		rdbtnMejorAjuste.setEnabled(false);

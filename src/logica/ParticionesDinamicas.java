@@ -1,11 +1,12 @@
 package logica;
 
 import java.awt.Color;
+import java.util.ArrayList;
 
-public class ParticionesEstVariables {
-
+public class ParticionesDinamicas {
+	
 	//Constructor por defecto
-	public ParticionesEstVariables(int asignacion) {
+	public ParticionesDinamicas(int asignacion) {
 		dividirMemoria();
 	}
 	
@@ -20,17 +21,21 @@ public class ParticionesEstVariables {
 	private Proceso SO = new Proceso(0, "S.O", 2048, new Color(215, 215, 84));
 	private int tamanoParticionMax = 7168;
 	private int tamanoParticionMin = 112;
-	private Particion particiones[] = new Particion[calcularNoParticiones()];
+	private ArrayList<Particion> particionesAr= new ArrayList<Particion>();
+	private Particion particiones[];
 	
 	
-	//Metodo que divide la memoria en partes que se van reduciendo a la mitad de tamaño mas la particion del S.O.
+	//Metodo que divide la memoria en particion del S.O. y las memoria libre
 	public void dividirMemoria() {
 			
 		//Definicion del tamaño de la particion del S.0.
-		particiones[0] = new Particion(0, false, SO.getTamano(), SO, 0);
+		particionesAr.add(new Particion(0, false, SO.getTamano(), SO, 0));
 		
+		int particionLibre = memoriaPpal - SO.getTamano();
+		particionesAr.add(new Particion(0, true, particionLibre, null, 0));
 		
-		int tamParticion = tamanoParticionMax;
+		particiones = particionesAr.toArray(new Particion[0]);
+		/*
 		//Creacion de particiones disponibles, en un arreglo
 		for(int i=1; i<particiones.length; i++) {
 			
@@ -42,6 +47,17 @@ public class ParticionesEstVariables {
 			}
 			
 		}
+		*/	
+		
+		//imprimir();
+		/*Proceso proc1 = new Proceso(1, "Prueba", 980, new Color(215, 153, 84));
+		añadirProceso(proc1, 3);
+		System.out.println("---");
+		imprimir();
+		*/
+		/*eliminarProceso(1);
+		System.out.println("---");
+		imprimir();*/
 		
 	}
 	
@@ -223,6 +239,6 @@ public class ParticionesEstVariables {
 
 	public void setTamanoParticionMin(int tamanoParticionMin) {
 		this.tamanoParticionMin = tamanoParticionMin;
-	}	
-	
+	}
+
 }

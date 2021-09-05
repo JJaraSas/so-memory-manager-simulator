@@ -5,6 +5,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 
 import javax.swing.JPanel;
+
+import logica.ParticionesDinamicas;
 import logica.ParticionesEstFijas;
 import logica.ParticionesEstVariables;
 
@@ -29,6 +31,7 @@ public class PanelDibujoProc extends JPanel{
 	
 	private ParticionesEstFijas particionesEstFijas;
 	private ParticionesEstVariables particionesEstVariables;
+	private ParticionesDinamicas particionesDinamicas;
 	
 	/**
 	 * Pintar el recuadro de procesos en memoria
@@ -143,6 +146,60 @@ public class PanelDibujoProc extends JPanel{
         	}
     	}
     	
+    	//Modelo Particiones Dinamicas
+    	if(modelo == 3) {
+        	
+        	int pos = 0; 	//Llava la posicion de donde se va a dibujar
+        	g.setFont(new Font("Tahoma", Font.BOLD, 7));		//Tamaño del texto en el dibujo
+        	
+        	//Calculando tamaño del S.O. para ser dibujada
+        	double tamanoSO = (particionesDinamicas.getSO().getTamano()*100.0)/particionesDinamicas.getMemoriaPpal();
+        	int drawSO = (int) (getWidth()*(tamanoSO/100));
+
+        	g.setColor(amarillo);
+        	g.fillRect(pos, 0, drawSO, getHeight());
+        	g.setColor(negro);
+        	g.drawRect(pos, 0, drawSO, getHeight()-1);
+        	
+        	g.drawString(particionesDinamicas.getParticiones()[0].getProceso().getNombre(), 5, (getHeight()*2)/5);
+        	g.drawString("PID=" + particionesDinamicas.getParticiones()[0].getProceso().getPID(), 5, ((getHeight()*4)/5));
+        	//g.drawString("T: " + partcionesEstFijas.getParticiones()[0].getTamano() + "KB", 5, (getHeight()*3)/5);
+        	
+        	pos = pos + drawSO;
+        	
+        	//Recorrer el arreglo de particiones para ir dibujando cada una
+        	for(int i=1; i<particionesDinamicas.getParticiones().length;i++) {
+        		
+        		int tamDibujo = cacularTamDibujo(i);
+        		int tamProceso = 0;
+        		
+        		g.setColor(verde);
+        		
+        		//Verificar si hay proceso en la particion, si lo hay calcular el tamaño
+        		if(particionesDinamicas.getParticiones()[i].getDisponible() == true)
+        			tamProceso = 0;	
+        		else
+        			tamProceso = cacularTamProceso(i);
+
+            	g.fillRect(pos, 0, tamDibujo, getHeight());	//Pintar particion
+            	
+            	if (tamProceso != 0) {		//Si la particion tiene proceso pintar proceso
+            		g.setColor(particionesDinamicas.getParticiones()[i].getProceso().getColor());
+            		g.fillRect(pos, 0, tamProceso, getHeight());
+            	}
+            	
+            	g.setColor(negro);			//Pintar borde
+            	g.drawRect(pos, 0, tamDibujo, getHeight()-1);
+            	
+            	if(particionesDinamicas.getParticiones()[i].getDisponible() == false) {
+                	g.drawString(particionesDinamicas.getParticiones()[i].getProceso().getNombre(), pos+5, (getHeight()*2)/5);
+                	g.drawString("PID=" + particionesDinamicas.getParticiones()[i].getProceso().getPID(), pos+5, ((getHeight()*4)/5));
+                	//g.drawString("T: " + partcionesEstFijas.getParticiones()[0].getTamano() + "KB", 5, (getHeight()*3)/5);
+            	}
+            	pos = pos + tamDibujo;		//Se suma el area dibujada a la posiscion
+        	}
+    	}
+    	
     }
 
     //Inicia la valriable del modelo
@@ -151,6 +208,8 @@ public class PanelDibujoProc extends JPanel{
     		particionesEstFijas = new ParticionesEstFijas(asignacion);
     	else if(modelo == 2)
     		particionesEstVariables = new ParticionesEstVariables(asignacion);
+    	else if(modelo == 3)
+    		particionesDinamicas = new ParticionesDinamicas(asignacion);
     }
     
     public void iniciarDibujoMemLibre() {
@@ -159,6 +218,8 @@ public class PanelDibujoProc extends JPanel{
     		dibujoMemLibre = new PanelDibujoMem(particionesEstFijas.getParticiones(), particionesEstFijas.getMemoriaPpal());
     	else if(modelo == 2)
     		dibujoMemLibre = new PanelDibujoMem(particionesEstVariables.getParticiones(), particionesEstVariables.getMemoriaPpal());
+    	else if(modelo == 3)
+    		dibujoMemLibre = new PanelDibujoMem(particionesDinamicas.getParticiones(), particionesDinamicas.getMemoriaPpal());
     		
     }
     
@@ -174,6 +235,10 @@ public class PanelDibujoProc extends JPanel{
     		return draw;
     	}else if(modelo == 2) {
     		double tamano = (particionesEstVariables.getParticiones()[posicion].getTamano()*100.0)/particionesEstVariables.getMemoriaPpal();
+        	int draw = (int) (getWidth()*(tamano/100));
+    		return draw;
+    	}else if(modelo == 3) {
+    		double tamano = (particionesDinamicas.getParticiones()[posicion].getTamano()*100.0)/particionesDinamicas.getMemoriaPpal();
         	int draw = (int) (getWidth()*(tamano/100));
     		return draw;
     	}else {
@@ -196,6 +261,10 @@ public class PanelDibujoProc extends JPanel{
     		double tamProceso = (particionesEstVariables.getParticiones()[posicion].getProceso().getTamano()*100.0)/particionesEstVariables.getMemoriaPpal();
         	int draw = (int) (getWidth()*(tamProceso/100));
     		return draw;
+    	}else if(modelo == 3) {
+    		double tamProceso = (particionesDinamicas.getParticiones()[posicion].getProceso().getTamano()*100.0)/particionesDinamicas.getMemoriaPpal();
+        	int draw = (int) (getWidth()*(tamProceso/100));
+    		return draw;
     	}else {
     		return 0;
     	}
@@ -215,6 +284,14 @@ public class PanelDibujoProc extends JPanel{
 
 	public void setParticionesEstVariables(ParticionesEstVariables particionesEstVariables) {
 		this.particionesEstVariables = particionesEstVariables;
+	}
+	
+	public ParticionesDinamicas getParticionesDinamicas() {
+		return particionesDinamicas;
+	}
+
+	public void setParticionesDinamicas(ParticionesDinamicas particionesDinamicas) {
+		this.particionesDinamicas = particionesDinamicas;
 	}
 
 	public PanelDibujoMem getDibujoMemLibre() {

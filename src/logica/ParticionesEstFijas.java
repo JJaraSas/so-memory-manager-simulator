@@ -32,17 +32,6 @@ public class ParticionesEstFijas {
 			particiones[i]= new Particion(i, true, tamanoParticion, null, 
 										  particiones[i-1].getInicio()+particiones[i-1].getTamano());
 		}
-			
-		/*
-		imprimir();
-		Proceso proc1 = new Proceso(1, "Prueba", 980, new Color(215, 153, 84));
-		añadirProceso(proc1, 3);
-		System.out.println("---");
-		imprimir();
-		*/
-		/*eliminarProceso(1);
-		System.out.println("---");
-		imprimir();*/
 		
 	}
 	
