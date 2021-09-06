@@ -345,7 +345,7 @@ public class JFramePrincipal extends JFrame implements ActionListener{
             	}else if(modelo == 2) {
             		agregado = dibujoProcesos.getParticionesEstVariables().añadirProceso(proceso, asignacion);
             	}else {
-            		agregado = dibujoProcesos.getParticionesDinamicas().añadirProceso(proceso, asignacion);
+            		agregado = dibujoProcesos.getParticionesDinamicas().añadirProceso(proceso, asignacion, compactacion);
             		dibujoProcesos.getParticionesDinamicas().imprimir();
             	}
             	
@@ -388,6 +388,8 @@ public class JFramePrincipal extends JFrame implements ActionListener{
             		eliminado = dibujoProcesos.getParticionesEstFijas().eliminarProceso(PID);
             	}else if (modelo == 2) {
             		eliminado = dibujoProcesos.getParticionesEstVariables().eliminarProceso(PID);
+            	}else if (modelo == 3) {
+            		eliminado = dibujoProcesos.getParticionesDinamicas().eliminarProceso(PID);
             	}
         		
         		

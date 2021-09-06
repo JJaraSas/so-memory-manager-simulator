@@ -17,7 +17,7 @@ public class ParticionesEstFijas {
 	//Definicion de tamaño de la memoria, el sistema operativo
 	//y de las particiones
 	private int memoriaPpal = 16384;
-	private Proceso SO = new Proceso(0, "S.O", 2048, new Color(215, 215, 84));
+	private Proceso SO = new Proceso(0, "S.O.", 2048, new Color(215, 215, 84));
 	private int tamanoParticion = 1024;
 	private Particion particiones[] = new Particion[((memoriaPpal-SO.getTamano())/tamanoParticion)+1];
 	
@@ -58,7 +58,6 @@ public class ParticionesEstFijas {
 				particiones[posicion].setProceso(proceso);
 				particiones[posicion].setDisponible(false);
 				contadorPID++;
-				imprimir();					//*************************
 				return true;
 			}else {
 				return false;
@@ -129,27 +128,12 @@ public class ParticionesEstFijas {
 				if(particiones[i].getProceso().getPID() == PID) {
 					particiones[i].setDisponible(true);
 					particiones[i].setProceso(null);
-					imprimir();
+
 					return true;	
 				}
 			}
 		}
 		return false;	
-	}
-	
-	
-	public void imprimir() {
-		for(int i=0; i<particiones.length; i++) {
-			System.out.print("ID: " + particiones[i].getId());
-			System.out.print(" | Disp: " + particiones[i].getDisponible());
-			if(particiones[i].getDisponible()==false) {
-				System.out.print(" | PID: " + particiones[i].getProceso().getPID());
-				System.out.print(" | Proc: " + particiones[i].getProceso().getNombre());
-			}
-			System.out.print(" | Tam: " + particiones[i].getTamano());
-			System.out.print(" | Ini: " + particiones[i].getInicio());
-			System.out.println();
-		}
 	}
 	
 	//getter y setter

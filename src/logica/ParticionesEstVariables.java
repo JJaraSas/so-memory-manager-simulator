@@ -17,7 +17,7 @@ public class ParticionesEstVariables {
 	//Definicion de tamaño de la memoria, el sistema operativo
 	//y de las particiones
 	private int memoriaPpal = 16384;
-	private Proceso SO = new Proceso(0, "S.O", 2048, new Color(215, 215, 84));
+	private Proceso SO = new Proceso(0, "S.O.", 2048, new Color(215, 215, 84));
 	private int tamanoParticionMax = 7168;
 	private int tamanoParticionMin = 112;
 	private Particion particiones[] = new Particion[calcularNoParticiones()];
