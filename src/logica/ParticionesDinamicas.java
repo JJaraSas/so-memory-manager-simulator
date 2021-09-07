@@ -171,6 +171,7 @@ public class ParticionesDinamicas {
 			}else {
 				if(compactacion == true & memTotalLibre >= proceso.getTamano()) {
 					procesoAgregado = compactar(proceso.getTamano());
+					procesoAgregado = añadirProceso(proceso, asignacion, compactacion);
 					memTotalLibre = memTotalLibre - proceso.getTamano();
 				}
 				
@@ -268,9 +269,9 @@ public class ParticionesDinamicas {
 			particionesAr.remove(pos1);
 			System.out.println("ARRAYLISTA");
 			imprimirAr();
-			//Mueve la primera particion libre hasta una posicion antes de la segunda particion y borra la posicion antigua
+
 			for (int i = pos1; i<pos2-1; i++) {
-				particionesAr.get(i).setInicio(particionesAr.get(i-2).getInicio()+particionesAr.get(i-2).getTamano());	
+				particionesAr.get(i).setInicio(particionesAr.get(i-1).getInicio()+particionesAr.get(i-1).getTamano());	
 				System.out.println("ARRAYLISTA - For");
 				imprimirAr();
 			}

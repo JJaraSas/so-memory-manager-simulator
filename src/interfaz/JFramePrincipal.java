@@ -28,6 +28,7 @@ import javax.swing.JToggleButton;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.SwingConstants;
 
 @SuppressWarnings("serial")
 public class JFramePrincipal extends JFrame implements ActionListener{
@@ -68,9 +69,11 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	private Label lblTitulo;
 	private JLabel lblMemoriaPrincipalpal;
 	private PanelDibujoMem dibujoMemoria;
-	private PanelDibujoProc dibujoProcesos;
 	private JLabel lblMemoriaLibre;
 	private JLabel lblKB;
+	private PanelDibujoProc dibujoProcesos;
+	private JLabel lblInicioMem;
+	private JLabel lblFinMemoria;
 	
 	private JLabel lblprocesosActivos;
 	private JScrollPane scrollActivos;
@@ -78,7 +81,6 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	private JButton btnAdd;
 	private JButton btnQuit;
 
-	
 	public JFramePrincipal() {
 		setTitle("Simulador Gestor de Memoria");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -229,6 +231,18 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		
 		dibujoMemoria = dibujoProcesos.getDibujoMemLibre();
 		panelMemoria.add(dibujoMemoria);
+		
+		lblInicioMem = new JLabel("0 KB");
+		lblInicioMem.setFont(new Font("Tahoma", Font.PLAIN, 9));
+		lblInicioMem.setHorizontalAlignment(SwingConstants.CENTER);
+		lblInicioMem.setBounds(10, 315, 45, 13);
+		panelMemoria.add(lblInicioMem);
+		
+		lblFinMemoria = new JLabel("16384 KB");
+		lblFinMemoria.setFont(new Font("Tahoma", Font.PLAIN, 9));
+		lblFinMemoria.setHorizontalAlignment(SwingConstants.CENTER);
+		lblFinMemoria.setBounds(525, 315, 45, 13);
+		panelMemoria.add(lblFinMemoria);
 		dibujoMemoria.setBounds(45, 45, 80, 150);
 		
 		//Lista de procesos activos
@@ -346,6 +360,8 @@ public class JFramePrincipal extends JFrame implements ActionListener{
             		agregado = dibujoProcesos.getParticionesEstVariables().añadirProceso(proceso, asignacion);
             	}else {
             		agregado = dibujoProcesos.getParticionesDinamicas().añadirProceso(proceso, asignacion, compactacion);
+            		//Se agrega para que se actualice el dibujo de memoria libre
+            		dibujoProcesos.getDibujoMemLibre().setParticiones(dibujoProcesos.getParticionesDinamicas().getParticiones());
             		dibujoProcesos.getParticionesDinamicas().imprimir();
             	}
             	
@@ -390,6 +406,8 @@ public class JFramePrincipal extends JFrame implements ActionListener{
             		eliminado = dibujoProcesos.getParticionesEstVariables().eliminarProceso(PID);
             	}else if (modelo == 3) {
             		eliminado = dibujoProcesos.getParticionesDinamicas().eliminarProceso(PID);
+            		//Se agrega para que se actualice el dibujo de memoria libre
+            		dibujoProcesos.getDibujoMemLibre().setParticiones(dibujoProcesos.getParticionesDinamicas().getParticiones());
             	}
         		
         		

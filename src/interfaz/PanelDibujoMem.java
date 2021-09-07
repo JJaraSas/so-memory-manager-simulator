@@ -27,6 +27,8 @@ public class PanelDibujoMem extends JPanel{
 	
 	public void paint(Graphics g) {
 		double tamanoOcupPorcen = (calcularTamOcupado()*100.0)/memoriaPpal;
+		System.out.println("TamañoOcupado:"+ tamanoOcupPorcen);
+		imprimir();
 		int drawOcupado = (int) (getHeight()*(tamanoOcupPorcen/100));
 		
     	g.setColor(verde);
@@ -45,13 +47,27 @@ public class PanelDibujoMem extends JPanel{
 	 */
 	public int calcularTamOcupado() {	
 		int tam = 0;
-		
 		for(int i=0; i<particiones.length; i++) {
 			if(particiones[i].getDisponible() == false) {
 				tam = tam + particiones[i].getTamano();
 			}
 		}
 		return tam;
+	}
+	
+	public void imprimir() {
+		System.out.println("///////////////");
+		for(int i=0; i<particiones.length; i++) {
+			System.out.print("ID: " + particiones[i].getId());
+			System.out.print(" | Disp: " + particiones[i].getDisponible());
+			if(particiones[i].getDisponible()==false) {
+				System.out.print(" | PID: " + particiones[i].getProceso().getPID());
+				System.out.print(" | Proc: " + particiones[i].getProceso().getNombre());
+			}
+			System.out.print(" | Tam: " + particiones[i].getTamano());
+			System.out.print(" | Ini: " + particiones[i].getInicio());
+			System.out.println();
+		}
 	}
 	
 	public Particion[] getParticiones() {
