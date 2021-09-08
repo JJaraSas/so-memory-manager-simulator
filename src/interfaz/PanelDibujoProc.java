@@ -3,8 +3,12 @@ package interfaz;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
 
 import javax.swing.JPanel;
+import javax.swing.UIManager;
 
 import logica.ParticionesDinamicas;
 import logica.ParticionesEstFijas;
@@ -16,6 +20,9 @@ public class PanelDibujoProc extends JPanel{
 	public PanelDibujoProc(int modelo, int asignacion) {
 		this.modelo = modelo;
 		this.asignacion = asignacion;
+		
+		setToolTipText("");
+		
 		inicialModelo();
 		iniciarDibujoMemLibre();
 	}
@@ -271,6 +278,135 @@ public class PanelDibujoProc extends JPanel{
     	
     }
     
+	public String getToolTipText(MouseEvent e) {
+		
+		String texto= "";
+		//Si el area sobre la que esta el mouse no es el area de dibujo returna null
+		if(getMousePosition() != null) {	
+			
+			int inicioPar = 0;
+			int finPar = 0;
+			int cont = -1;
+			int posXMouse = this.getMousePosition().x;
+			
+			if(modelo == 1) {
+	    		
+				do{
+					cont++;
+					//el area de dibujo puede tener algunos pixeles mas que el area dibujada asi que si el 
+					//contador se pasa lo regresa para evitar error de posicion que no existe
+					if(cont >= particionesEstFijas.getParticiones().length)
+						cont--;
+
+					//Si la posicion es la 0 el inicio es 0
+					if(cont <= 0) {
+						inicioPar = 0;
+						finPar = (inicioPar + cacularTamDibujo(cont));
+					}else {
+						inicioPar = (finPar);
+						finPar = (inicioPar + cacularTamDibujo(cont));
+					}
+				}while( posXMouse < inicioPar ||  posXMouse > finPar);
+				
+				texto = "<html>";
+				
+				if(particionesEstFijas.getParticiones()[cont].getDisponible()==false) {
+					texto = texto + "Proceso: " + particionesEstFijas.getParticiones()[cont].getProceso().getNombre();
+					texto = texto + "<br/>PID: " + particionesEstFijas.getParticiones()[cont].getProceso().getPID();
+					texto = texto + "<br/>Tamaño Particion: " + particionesEstFijas.getParticiones()[cont].getTamano() + "KB";
+					texto = texto + "<br/> Ocupado: " + particionesEstFijas.getParticiones()[cont].getProceso().getTamano()  + " KB";
+					UIManager.put("ToolTip.background", particionesEstFijas.getParticiones()[cont].getProceso().getColor());
+				}else {
+					texto =  texto + "Libre";
+					UIManager.put("ToolTip.background", verde);
+				}
+				texto = texto + "<br />Inicio: " + particionesEstFijas.getParticiones()[cont].getInicio() + " KB<br/>Fin: "
+						+ (particionesEstFijas.getParticiones()[cont].getInicio() + particionesEstFijas.getParticiones()[cont].getTamano() - 1) + " KB</html>";
+				
+	    	}else if(modelo == 2) {
+	    		
+	    		do{
+					cont++;
+					//el area de dibujo puede tener algunos pixeles mas que el area dibujada asi que si el 
+					//contador se pasa lo regresa para evitar error de posicion que no existe
+					if(cont >= particionesEstVariables.getParticiones().length)
+						cont--;
+
+					//Si la posicion es la 0 el inicio es 0
+					if(cont <= 0) {
+						inicioPar = 0;
+						finPar = (inicioPar + cacularTamDibujo(cont));
+					}else {
+						inicioPar = (finPar);
+						finPar = (inicioPar + cacularTamDibujo(cont));
+					}
+				}while( posXMouse < inicioPar ||  posXMouse > finPar);
+				
+				texto = "<html>";
+				
+				if(particionesEstVariables.getParticiones()[cont].getDisponible()==false) {
+					texto = texto + "Proceso: " + particionesEstVariables.getParticiones()[cont].getProceso().getNombre();
+					texto = texto + "<br/>PID: " + particionesEstVariables.getParticiones()[cont].getProceso().getPID();
+					texto = texto + "<br/>Tamaño Particion: " + particionesEstVariables.getParticiones()[cont].getTamano() + "KB";
+					texto = texto + "<br/> Ocupado: " + particionesEstVariables.getParticiones()[cont].getProceso().getTamano()  + " KB";
+					UIManager.put("ToolTip.background", particionesEstVariables.getParticiones()[cont].getProceso().getColor());
+				}else {
+					texto =  texto + "Libre";
+					UIManager.put("ToolTip.background", verde);
+				}
+				texto = texto + "<br />Inicio: " + particionesEstVariables.getParticiones()[cont].getInicio() + " KB<br/>Fin: "
+						+ (particionesEstVariables.getParticiones()[cont].getInicio() + particionesEstVariables.getParticiones()[cont].getTamano() - 1) + " KB</html>";
+	    		
+	    	}else if(modelo == 3) {
+	    		
+	    		do{
+					cont++;
+					//el area de dibujo puede tener algunos pixeles mas que el area dibujada asi que si el 
+					//contador se pasa lo regresa para evitar error de posicion que no existe
+					if(cont >= particionesDinamicas.getParticiones().length)
+						cont--;
+
+					//Si la posicion es la 0 el inicio es 0
+					if(cont <= 0) {
+						inicioPar = 0;
+						finPar = (inicioPar + cacularTamDibujo(cont));
+					}else {
+						inicioPar = (finPar);
+						finPar = (inicioPar + cacularTamDibujo(cont));
+					}
+				}while( posXMouse < inicioPar ||  posXMouse > finPar);
+				
+				texto = "<html>";
+				
+				if(particionesDinamicas.getParticiones()[cont].getDisponible()==false) {
+					texto = texto + "Proceso: " + particionesDinamicas.getParticiones()[cont].getProceso().getNombre();
+					texto = texto + "<br/>PID: " + particionesDinamicas.getParticiones()[cont].getProceso().getPID();
+					texto = texto + "<br/>Tamaño Particion: " + particionesDinamicas.getParticiones()[cont].getTamano() + "KB";
+					texto = texto + "<br/> Ocupado: " + particionesDinamicas.getParticiones()[cont].getProceso().getTamano() + " KB";
+					UIManager.put("ToolTip.background", particionesDinamicas.getParticiones()[cont].getProceso().getColor());
+				}else {
+					texto =  texto + "Libre";
+					UIManager.put("ToolTip.background", verde);
+				}
+				texto = texto + "<br />Inicio: " + particionesDinamicas.getParticiones()[cont].getInicio() + " KB<br/>Fin: "
+						+ (particionesDinamicas.getParticiones()[cont].getInicio() + particionesDinamicas.getParticiones()[cont].getTamano() - 1) + " KB</html>";
+	    		
+	    	}else {
+	    		return "";
+	    	}
+			 
+		}
+		return texto;
+    }
+	
+	//Ubicacion del TooltopText
+	public Point getToolTipLocation(MouseEvent e){
+		Point p = e.getPoint();
+		p.y += 15;
+		return p;
+		//return super.getToolTipLocation(e);
+	 }
+    
 	public ParticionesEstFijas getParticionesEstFijas() {
 		return particionesEstFijas;
 	}
@@ -301,7 +437,5 @@ public class PanelDibujoProc extends JPanel{
 	public void setDibujoMemLibre(PanelDibujoMem dibujoMemLibre) {
 		this.dibujoMemLibre = dibujoMemLibre;
 	}
-    
-    
 
 }
