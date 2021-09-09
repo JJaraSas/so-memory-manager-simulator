@@ -10,6 +10,7 @@ import java.awt.event.MouseMotionListener;
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
+import logica.Paginacion;
 import logica.ParticionesDinamicas;
 import logica.ParticionesEstFijas;
 import logica.ParticionesEstVariables;
@@ -39,6 +40,7 @@ public class PanelDibujoProc extends JPanel{
 	private ParticionesEstFijas particionesEstFijas;
 	private ParticionesEstVariables particionesEstVariables;
 	private ParticionesDinamicas particionesDinamicas;
+	private Paginacion paginacion;
 	
 	/**
 	 * Pintar el recuadro de procesos en memoria
@@ -207,6 +209,59 @@ public class PanelDibujoProc extends JPanel{
         	}
     	}
     	
+    	//Modelo Paginacion
+    	if(modelo == 4) {
+        	
+        	int pos = 0; 	//Llava la posicion de donde se va a dibujar
+        	g.setFont(new Font("Tahoma", Font.BOLD, 7));		//Tamaño del texto en el dibujo
+        	
+        	//Calculando tamaño del S.O. para ser dibujada
+        	double tamanoSO = (paginacion.getSO().getTamano()*100.0)/paginacion.getMemoriaPpal();
+        	int drawSO = (int) (getWidth()*(tamanoSO/100));
+
+        	g.setColor(amarillo);
+        	g.fillRect(pos, 0, drawSO, getHeight());
+        	g.setColor(negro);
+        	g.drawRect(pos, 0, drawSO, getHeight()-1);
+        	
+        	g.drawString(paginacion.getParticiones()[0].getProceso().getNombre(), 5, (getHeight()*2)/5);
+        	g.drawString("PID=" + paginacion.getParticiones()[0].getProceso().getPID(), 5, ((getHeight()*4)/5));
+        	//g.drawString("T: " + partcionesEstFijas.getParticiones()[0].getTamano() + "KB", 5, (getHeight()*3)/5);
+        	
+        	pos = pos + drawSO;
+        	
+        	//Recorrer el arreglo de particiones para ir dibujando cada una
+        	for(int i=1; i<paginacion.getParticiones().length;i++) {
+        		
+        		int tamDibujo = cacularTamDibujo(i);
+        		int tamProceso = 0;
+        		
+        		g.setColor(verde);
+        		//Verificar si hay proceso en la particion, si lo hay calcular el tamaño
+        		if(paginacion.getParticiones()[i].getDisponible() == true)
+        			tamProceso = 0;	
+        		else
+        			tamProceso = cacularTamProceso(i);
+
+            	g.fillRect(pos, 0, tamDibujo, getHeight());	//Pintar particion
+            	
+            	if (tamProceso != 0) {		//Si la particion tiene proceso pintar proceso
+            		g.setColor(paginacion.getParticiones()[i].getProceso().getColor());
+            		g.fillRect(pos, 0, tamProceso, getHeight());
+            	}
+            	
+            	g.setColor(negro);			//Pintar borde
+            	g.drawRect(pos, 0, tamDibujo, getHeight()-1);
+            	
+            	if(paginacion.getParticiones()[i].getDisponible() == false) {
+                	g.drawString(paginacion.getParticiones()[i].getProceso().getNombre(), pos+5, (getHeight()*2)/5);
+                	g.drawString("PID=" + paginacion.getParticiones()[i].getProceso().getPID(), pos+5, ((getHeight()*4)/5));
+                	//g.drawString("T: " + partcionesEstFijas.getParticiones()[0].getTamano() + "KB", 5, (getHeight()*3)/5);
+            	}
+            	pos = pos + tamDibujo;		//Se suma el area dibujada a la posiscion
+        	}
+    	}
+    	
     }
 
     //Inicia la valriable del modelo
@@ -217,6 +272,8 @@ public class PanelDibujoProc extends JPanel{
     		particionesEstVariables = new ParticionesEstVariables(asignacion);
     	else if(modelo == 3)
     		particionesDinamicas = new ParticionesDinamicas(asignacion);
+    	else if(modelo == 4)
+    		paginacion = new Paginacion();
     }
     
     public void iniciarDibujoMemLibre() {
@@ -227,6 +284,8 @@ public class PanelDibujoProc extends JPanel{
     		dibujoMemLibre = new PanelDibujoMem(particionesEstVariables.getParticiones(), particionesEstVariables.getMemoriaPpal());
     	else if(modelo == 3)
     		dibujoMemLibre = new PanelDibujoMem(particionesDinamicas.getParticiones(), particionesDinamicas.getMemoriaPpal());
+    	else if(modelo == 4)
+    		dibujoMemLibre = new PanelDibujoMem(paginacion.getParticiones(),paginacion.getMemoriaPpal());
     		
     }
     
@@ -246,6 +305,10 @@ public class PanelDibujoProc extends JPanel{
     		return draw;
     	}else if(modelo == 3) {
     		double tamano = (particionesDinamicas.getParticiones()[posicion].getTamano()*100.0)/particionesDinamicas.getMemoriaPpal();
+        	int draw = (int) (getWidth()*(tamano/100));
+    		return draw;
+    	}else if(modelo == 3) {
+    		double tamano = (paginacion.getParticiones()[posicion].getTamano()*100.0)/paginacion.getMemoriaPpal();
         	int draw = (int) (getWidth()*(tamano/100));
     		return draw;
     	}else {
@@ -270,6 +333,10 @@ public class PanelDibujoProc extends JPanel{
     		return draw;
     	}else if(modelo == 3) {
     		double tamProceso = (particionesDinamicas.getParticiones()[posicion].getProceso().getTamano()*100.0)/particionesDinamicas.getMemoriaPpal();
+        	int draw = (int) (getWidth()*(tamProceso/100));
+    		return draw;
+    	}else if(modelo == 4) {
+    		double tamProceso = (paginacion.getParticiones()[posicion].getProceso().getTamano()*100.0)/paginacion.getMemoriaPpal();
         	int draw = (int) (getWidth()*(tamProceso/100));
     		return draw;
     	}else {
@@ -311,16 +378,17 @@ public class PanelDibujoProc extends JPanel{
 				texto = "<html>";
 				
 				if(particionesEstFijas.getParticiones()[cont].getDisponible()==false) {
-					texto = texto + "Proceso: " + particionesEstFijas.getParticiones()[cont].getProceso().getNombre();
-					texto = texto + "<br/>PID: " + particionesEstFijas.getParticiones()[cont].getProceso().getPID();
-					texto = texto + "<br/>Tamaño Particion: " + particionesEstFijas.getParticiones()[cont].getTamano() + "KB";
-					texto = texto + "<br/> Ocupado: " + particionesEstFijas.getParticiones()[cont].getProceso().getTamano()  + " KB";
+					texto = texto + "<b>Proceso:</b> " + particionesEstFijas.getParticiones()[cont].getProceso().getNombre();
+					texto = texto + "<br/><b>PID:</b> " + particionesEstFijas.getParticiones()[cont].getProceso().getPID();
+					texto = texto + "<br/><b>Tamaño Particion:</b> " + particionesEstFijas.getParticiones()[cont].getTamano() + "KB";
+					texto = texto + "<br/><b>Ocupado:</b> " + particionesEstFijas.getParticiones()[cont].getProceso().getTamano()  + " KB";
 					UIManager.put("ToolTip.background", particionesEstFijas.getParticiones()[cont].getProceso().getColor());
 				}else {
-					texto =  texto + "Libre";
+					texto =  texto + "<b>Libre</b>";
+					texto = texto + "<br/><b>Tamaño Particion:</b> " + particionesEstVariables.getParticiones()[cont].getTamano() + "KB";
 					UIManager.put("ToolTip.background", verde);
 				}
-				texto = texto + "<br />Inicio: " + particionesEstFijas.getParticiones()[cont].getInicio() + " KB<br/>Fin: "
+				texto = texto + "<br /><b>Inicio:</b> " + particionesEstFijas.getParticiones()[cont].getInicio() + " KB<br/><b>Fin: </b>"
 						+ (particionesEstFijas.getParticiones()[cont].getInicio() + particionesEstFijas.getParticiones()[cont].getTamano() - 1) + " KB</html>";
 				
 	    	}else if(modelo == 2) {
@@ -345,17 +413,18 @@ public class PanelDibujoProc extends JPanel{
 				texto = "<html>";
 				
 				if(particionesEstVariables.getParticiones()[cont].getDisponible()==false) {
-					texto = texto + "Proceso: " + particionesEstVariables.getParticiones()[cont].getProceso().getNombre();
-					texto = texto + "<br/>PID: " + particionesEstVariables.getParticiones()[cont].getProceso().getPID();
-					texto = texto + "<br/>Tamaño Particion: " + particionesEstVariables.getParticiones()[cont].getTamano() + "KB";
-					texto = texto + "<br/> Ocupado: " + particionesEstVariables.getParticiones()[cont].getProceso().getTamano()  + " KB";
+					texto = texto + "<b>Proceso:</b> " + particionesEstVariables.getParticiones()[cont].getProceso().getNombre();
+					texto = texto + "<br/><b>PID:</b> " + particionesEstVariables.getParticiones()[cont].getProceso().getPID();
+					texto = texto + "<br/><b>Tamaño Particion:</b> " + particionesEstVariables.getParticiones()[cont].getTamano() + "KB";
+					texto = texto + "<br/><b>Ocupado:</b> " + particionesEstVariables.getParticiones()[cont].getProceso().getTamano()  + "KB";
 					UIManager.put("ToolTip.background", particionesEstVariables.getParticiones()[cont].getProceso().getColor());
 				}else {
-					texto =  texto + "Libre";
+					texto =  texto + "<b>Libre</b>";
+					texto = texto + "<br/><b>Tamaño Particion:</b> " + particionesEstVariables.getParticiones()[cont].getTamano() + "KB";
 					UIManager.put("ToolTip.background", verde);
 				}
-				texto = texto + "<br />Inicio: " + particionesEstVariables.getParticiones()[cont].getInicio() + " KB<br/>Fin: "
-						+ (particionesEstVariables.getParticiones()[cont].getInicio() + particionesEstVariables.getParticiones()[cont].getTamano() - 1) + " KB</html>";
+				texto = texto + "<br /><b>Inicio:</b> " + particionesEstVariables.getParticiones()[cont].getInicio() + "KB<br/><b>Fin:</b> "
+						+ (particionesEstVariables.getParticiones()[cont].getInicio() + particionesEstVariables.getParticiones()[cont].getTamano() - 1) + "KB</html>";
 	    		
 	    	}else if(modelo == 3) {
 	    		
@@ -379,16 +448,17 @@ public class PanelDibujoProc extends JPanel{
 				texto = "<html>";
 				
 				if(particionesDinamicas.getParticiones()[cont].getDisponible()==false) {
-					texto = texto + "Proceso: " + particionesDinamicas.getParticiones()[cont].getProceso().getNombre();
-					texto = texto + "<br/>PID: " + particionesDinamicas.getParticiones()[cont].getProceso().getPID();
-					texto = texto + "<br/>Tamaño Particion: " + particionesDinamicas.getParticiones()[cont].getTamano() + "KB";
-					texto = texto + "<br/> Ocupado: " + particionesDinamicas.getParticiones()[cont].getProceso().getTamano() + " KB";
+					texto = texto + "<b>Proceso:</b> " + particionesDinamicas.getParticiones()[cont].getProceso().getNombre();
+					texto = texto + "<br/><b>PID:</b> " + particionesDinamicas.getParticiones()[cont].getProceso().getPID();
+					texto = texto + "<br/><b>Tamaño Particion:</b> " + particionesDinamicas.getParticiones()[cont].getTamano() + "KB";
+					texto = texto + "<br/><b>Ocupado:</b> " + particionesDinamicas.getParticiones()[cont].getProceso().getTamano() + " KB";
 					UIManager.put("ToolTip.background", particionesDinamicas.getParticiones()[cont].getProceso().getColor());
 				}else {
-					texto =  texto + "Libre";
+					texto =  texto + "<b>Libre</b>";
 					UIManager.put("ToolTip.background", verde);
+					texto = texto + "<br/><b>Tamaño Particion:</b> " + particionesDinamicas.getParticiones()[cont].getTamano() + "KB";
 				}
-				texto = texto + "<br />Inicio: " + particionesDinamicas.getParticiones()[cont].getInicio() + " KB<br/>Fin: "
+				texto = texto + "<br/><b>Inicio:</b> " + particionesDinamicas.getParticiones()[cont].getInicio() + " KB<br/><b>Fin:</b> "
 						+ (particionesDinamicas.getParticiones()[cont].getInicio() + particionesDinamicas.getParticiones()[cont].getTamano() - 1) + " KB</html>";
 	    		
 	    	}else {
@@ -428,6 +498,14 @@ public class PanelDibujoProc extends JPanel{
 
 	public void setParticionesDinamicas(ParticionesDinamicas particionesDinamicas) {
 		this.particionesDinamicas = particionesDinamicas;
+	}
+
+	public Paginacion getPaginacion() {
+		return paginacion;
+	}
+
+	public void setPaginacion(Paginacion paginacion) {
+		this.paginacion = paginacion;
 	}
 
 	public PanelDibujoMem getDibujoMemLibre() {

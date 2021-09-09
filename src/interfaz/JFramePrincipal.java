@@ -60,6 +60,7 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	private JRadioButton rdbtnMejorAjuste;
 	private JRadioButton rdbtnPeorAjuste;
 	private JCheckBox chckbxCompactacion;
+	private JRadioButton rdbtnPaginacion;
 	
 	private JPanel panelMensajes;
 	private JTextPane textMensajes;
@@ -146,10 +147,15 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		chckbxCompactacion.setBounds(35, 109, 127, 21);
 		panelModMemoria.add(chckbxCompactacion);
 		
+		rdbtnPaginacion = new JRadioButton("Paginacion");
+		rdbtnPaginacion.setBounds(10, 132, 103, 21);
+		panelModMemoria.add(rdbtnPaginacion);
+		
 		btgModMemoria = new ButtonGroup();
 		btgModMemoria.add(rdbtnPEstaticaFijas);
 		btgModMemoria.add(rdbtnPEstaticasVariables);
 		btgModMemoria.add(rdbtnPDinamicas);
+		btgModMemoria.add(rdbtnPaginacion);
 		
 		//Panel Algoritmo Asignacion
 		panelAsignacion = new JPanel();
@@ -159,15 +165,18 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		panelAsignacion.setLayout(null);
 		
 		rdbtnPrimerAjuste = new JRadioButton("Primer Ajuste");
+		rdbtnPrimerAjuste.setToolTipText("Asignar el primer fragmento libre que tenga el tama\u00F1o suficiente.");
 		rdbtnPrimerAjuste.setSelected(true);
 		rdbtnPrimerAjuste.setBounds(10, 34, 103, 21);
 		panelAsignacion.add(rdbtnPrimerAjuste);
 		
 		rdbtnMejorAjuste = new JRadioButton("Mejor Ajuste");
+		rdbtnMejorAjuste.setToolTipText("Asignar el fragmento m\u00E1s peque\u00F1o que tenga el tama\u00F1o suficiente.");
 		rdbtnMejorAjuste.setBounds(10, 74, 103, 21);
 		panelAsignacion.add(rdbtnMejorAjuste);
 		
 		rdbtnPeorAjuste = new JRadioButton("Peor Ajuste");
+		rdbtnPeorAjuste.setToolTipText("Asignar el fragmento m\u00E1s grande.");
 		rdbtnPeorAjuste.setBounds(10, 114, 103, 21);
 		panelAsignacion.add(rdbtnPeorAjuste);
 		
@@ -292,6 +301,8 @@ public class JFramePrincipal extends JFrame implements ActionListener{
             		modelo = 2;
             	else if(rdbtnPDinamicas.isSelected())
             		modelo = 3;
+            	else if(rdbtnPaginacion.isSelected())
+            		modelo = 4;
             	
             	//Metodo de asignacion
             	if(rdbtnPrimerAjuste.isSelected())
@@ -311,6 +322,8 @@ public class JFramePrincipal extends JFrame implements ActionListener{
             		lblTitulo.setText("Particiones Estaticas Variables");
             	}else if(modelo == 3){
             		lblTitulo.setText("Particiones Dinamicas");
+            	}else if(modelo == 4) {
+            		lblTitulo.setText("Paginación");
             	}
             	
             	desabilitarIniciado();
@@ -440,6 +453,8 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 			activos = generarListaActivos(dibujoProcesos.getParticionesEstVariables().getParticiones());
 		else if (modelo == 3)
 			activos = generarListaActivos(dibujoProcesos.getParticionesDinamicas().getParticiones());
+		else if (modelo == 4)
+			activos = generarListaActivos(dibujoProcesos.getPaginacion().getParticiones());
 	}
 	
 	/**
