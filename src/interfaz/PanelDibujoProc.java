@@ -235,8 +235,9 @@ public class PanelDibujoProc extends JPanel{
         		
         		int tamDibujo = cacularTamDibujo(i);
         		int tamProceso = 0;
-        		
+  
         		g.setColor(verde);
+        		
         		//Verificar si hay proceso en la particion, si lo hay calcular el tamaño
         		if(paginacion.getParticiones()[i].getDisponible() == true)
         			tamProceso = 0;	
@@ -307,7 +308,7 @@ public class PanelDibujoProc extends JPanel{
     		double tamano = (particionesDinamicas.getParticiones()[posicion].getTamano()*100.0)/particionesDinamicas.getMemoriaPpal();
         	int draw = (int) (getWidth()*(tamano/100));
     		return draw;
-    	}else if(modelo == 3) {
+    	}else if(modelo == 4) {
     		double tamano = (paginacion.getParticiones()[posicion].getTamano()*100.0)/paginacion.getMemoriaPpal();
         	int draw = (int) (getWidth()*(tamano/100));
     		return draw;
@@ -461,6 +462,40 @@ public class PanelDibujoProc extends JPanel{
 				texto = texto + "<br/><b>Inicio:</b> " + particionesDinamicas.getParticiones()[cont].getInicio() + " KB<br/><b>Fin:</b> "
 						+ (particionesDinamicas.getParticiones()[cont].getInicio() + particionesDinamicas.getParticiones()[cont].getTamano() - 1) + " KB</html>";
 	    		
+	    	}if(modelo == 4) {
+	    		
+				do{
+					cont++;
+					//el area de dibujo puede tener algunos pixeles mas que el area dibujada asi que si el 
+					//contador se pasa lo regresa para evitar error de posicion que no existe
+					if(cont >= paginacion.getParticiones().length)
+						cont--;
+
+					//Si la posicion es la 0 el inicio es 0
+					if(cont <= 0) {
+						inicioPar = 0;
+						finPar = (inicioPar + cacularTamDibujo(cont));
+					}else {
+						inicioPar = (finPar);
+						finPar = (inicioPar + cacularTamDibujo(cont));
+					}
+				}while( posXMouse < inicioPar ||  posXMouse > finPar);
+				
+				texto = "<html>";
+				
+				if(paginacion.getParticiones()[cont].getDisponible()==false) {
+					texto = texto + "<b>Proceso:</b> " + paginacion.getParticiones()[cont].getProceso().getNombre();
+					texto = texto + "<br/><b>PID:</b> " + paginacion.getParticiones()[cont].getProceso().getPID();
+					texto = texto + "<br/><b>Tamaño Particion:</b> " + paginacion.getParticiones()[cont].getTamano() + "KB";
+					texto = texto + "<br/><b>Ocupado:</b> " + paginacion.getParticiones()[cont].getProceso().getTamano()  + " KB";
+					UIManager.put("ToolTip.background", paginacion.getParticiones()[cont].getProceso().getColor());
+				}else {
+					texto =  texto + "<b>Libre</b>";
+					texto = texto + "<br/><b>Tamaño Particion:</b> " + paginacion.getParticiones()[cont].getTamano() + "KB";
+					UIManager.put("ToolTip.background", verde);
+				}
+				texto = texto + "<br /><b>Inicio:</b> " + paginacion.getParticiones()[cont].getInicio() + " KB<br/><b>Fin: </b>"
+						+ (paginacion.getParticiones()[cont].getInicio() + paginacion.getParticiones()[cont].getTamano() - 1) + " KB</html>";
 	    	}else {
 	    		return "";
 	    	}

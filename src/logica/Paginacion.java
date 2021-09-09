@@ -8,6 +8,9 @@ public class Paginacion {
 		dividirMemoria();
 	}
 	
+	//Contador que permite asignar PID a cada proceso
+	int contadorPID = 1;
+	
 	private int memoriaPpal = 16384;
 	private int memTotalLibre = 0;
 	private int tamanoMarco = 256;
@@ -27,14 +30,34 @@ public class Paginacion {
 		}
 		
 		imprimir();
-		/*Proceso proc1 = new Proceso(1, "Prueba", 980, new Color(215, 153, 84));
-		añadirProceso(proc1, 3);
-		System.out.println("---");
-		imprimir();
-		*/
-		/*eliminarProceso(1);
-		System.out.println("---");
-		imprimir();*/
+		
+	}
+	
+	/**
+	 * Añade los procesos a matriz memoria:
+	 * @param proceso
+	 * @param asignacion:
+	 *  1-Primer ajuste | 2-Mejor ajuste | 3-Peor Ajuste
+	 */
+	public boolean añadirProceso(Proceso proceso) {
+		
+		int posicion = 0;
+		proceso.setPID(contadorPID);
+									
+		for(int i=1; i<particiones.length; i++) {
+			if(particiones[i].getDisponible() == true & particiones[i].getTamano() >= proceso.getTamano() ) {
+				posicion = i;
+				break;
+			}
+		}
+		if(posicion != 0) {
+			particiones[posicion].setProceso(proceso);
+			particiones[posicion].setDisponible(false);
+			contadorPID++;
+			return true;
+		}else {
+			return false;
+		}
 		
 	}
 
