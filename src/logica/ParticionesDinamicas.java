@@ -3,12 +3,16 @@ package logica;
 import java.awt.Color;
 import java.util.ArrayList;
 
+import javax.swing.table.DefaultTableModel;
+
 public class ParticionesDinamicas {
 	
 	//Constructor por defecto
 	public ParticionesDinamicas(int asignacion) {
 		dividirMemoria();
 	}
+	
+	private IntAHex conversorHex = new IntAHex();
 	
 	//Contador que permite asignar PID a cada proceso 
 	// En este modelo contadorPID+1 servira para identificar la particion
@@ -24,6 +28,10 @@ public class ParticionesDinamicas {
 	private ArrayList<Particion> particionesAr= new ArrayList<Particion>();
 	private Particion particiones[];
 	
+	//Variables para la creacion de la tabla de procesos
+	private DefaultTableModel modeloTabla;
+	String[] nombreColumna = {"Proceso", "PID", "Tamaño", "Ocupado", "Inicio", "Fin"};
+	Object[][] procesoModelo = new Object[1][6];
 	
 	//Metodo que divide la memoria en particion del S.O. y las memoria libre
 	public void dividirMemoria() {
@@ -36,15 +44,14 @@ public class ParticionesDinamicas {
 		
 		particiones = particionesAr.toArray(new Particion[0]);
 		
-		//imprimir();
-		/*Proceso proc1 = new Proceso(1, "Prueba", 980, new Color(215, 153, 84));
-		añadirProceso(proc1, 3);
-		System.out.println("---");
-		imprimir();
-		*/
-		/*eliminarProceso(1);
-		System.out.println("---");
-		imprimir();*/
+		//Agrega S.O. al modelo de la tabla
+		procesoModelo[0][0] = SO.getNombre();
+		procesoModelo[0][1] = SO.getPID();
+		procesoModelo[0][2] = particiones[0].getTamano();
+		procesoModelo[0][3] = particiones[0].getProceso().getTamano();
+		procesoModelo[0][4] = conversorHex.toHex(particiones[0].getInicio()*1204);
+		procesoModelo[0][5] = conversorHex.toHex(particiones[0].getInicio()*1204+particiones[0].getTamano()*1204);
+		modeloTabla = new DefaultTableModel(procesoModelo,  nombreColumna);
 		
 	}
 	
@@ -87,7 +94,16 @@ public class ParticionesDinamicas {
 					contadorPID++;
 					memTotalLibre = memTotalLibre - proceso.getTamano();
 					arrayListToArray();
-					imprimir();				//*************************
+					
+					//Insertando en la tabla de procesos
+					procesoModelo[0][0] = particiones[posicion].getProceso().getNombre();
+					procesoModelo[0][1] = particiones[posicion].getProceso().getPID();
+					procesoModelo[0][2] = particiones[posicion].getTamano();
+					procesoModelo[0][3] = particiones[posicion].getProceso().getTamano();
+					procesoModelo[0][4] = conversorHex.toHex(particiones[posicion].getInicio()*1024);
+					procesoModelo[0][5] = conversorHex.toHex((particiones[posicion].getInicio()*1024+particiones[posicion].getTamano()*1024)-1);
+					modeloTabla.addRow(procesoModelo[0]);
+					
 					procesoAgregado = true;
 				}else {
 					procesoAgregado = false;
@@ -123,7 +139,16 @@ public class ParticionesDinamicas {
 					contadorPID++;
 					memTotalLibre = memTotalLibre - proceso.getTamano();
 					arrayListToArray();
-					imprimir();				//*************************
+
+					//Insertando en la tabla de procesos
+					procesoModelo[0][0] = particiones[posicion].getProceso().getNombre();
+					procesoModelo[0][1] = particiones[posicion].getProceso().getPID();
+					procesoModelo[0][2] = particiones[posicion].getTamano();
+					procesoModelo[0][3] = particiones[posicion].getProceso().getTamano();
+					procesoModelo[0][4] = conversorHex.toHex(particiones[posicion].getInicio()*1024);
+					procesoModelo[0][5] = conversorHex.toHex((particiones[posicion].getInicio()*1024+particiones[posicion].getTamano()*1024)-1);
+					modeloTabla.addRow(procesoModelo[0]);
+					
 					procesoAgregado = true;
 				}else {
 					procesoAgregado = false;
@@ -159,7 +184,16 @@ public class ParticionesDinamicas {
 					contadorPID++;
 					memTotalLibre = memTotalLibre - proceso.getTamano();
 					arrayListToArray();
-					imprimir();				//*************************
+
+					//Insertando en la tabla de procesos
+					procesoModelo[0][0] = particiones[posicion].getProceso().getNombre();
+					procesoModelo[0][1] = particiones[posicion].getProceso().getPID();
+					procesoModelo[0][2] = particiones[posicion].getTamano();
+					procesoModelo[0][3] = particiones[posicion].getProceso().getTamano();
+					procesoModelo[0][4] = conversorHex.toHex(particiones[posicion].getInicio()*1024);
+					procesoModelo[0][5] = conversorHex.toHex((particiones[posicion].getInicio()*1024+particiones[posicion].getTamano()*1024)-1);
+					modeloTabla.addRow(procesoModelo[0]);
+					
 					procesoAgregado = true;
 				}else {
 					procesoAgregado = false;
@@ -174,6 +208,21 @@ public class ParticionesDinamicas {
 					procesoAgregado = compactar(proceso.getTamano());
 					procesoAgregado = añadirProceso(proceso, asignacion, compactacion);
 					memTotalLibre = memTotalLibre - proceso.getTamano();
+					
+					//Se recontruye el modelo de la tabla
+					modeloTabla.setRowCount(0);
+					//Eliminando de la tabla de particiones
+					for (int i = 0; i < particiones.length; i++) {
+						//Insertando en la tabla de procesos
+						procesoModelo[0][0] = particiones[i].getProceso().getNombre();
+						procesoModelo[0][1] = particiones[i].getProceso().getPID();
+						procesoModelo[0][2] = particiones[i].getTamano();
+						procesoModelo[0][3] = particiones[i].getProceso().getTamano();
+						procesoModelo[0][4] = conversorHex.toHex(particiones[i].getInicio()*1024);
+						procesoModelo[0][5] = conversorHex.toHex((particiones[i].getInicio()*1024+particiones[i].getTamano()*1024)-1);
+						modeloTabla.addRow(procesoModelo[0]);
+					}
+					
 				}
 				
 				return procesoAgregado;
@@ -227,8 +276,18 @@ public class ParticionesDinamicas {
 					}
 					memTotalLibre = memTotalLibre + tamProceso;
 					arrayListToArray();
-					System.out.println("Arreglo en borrado: " + particionesAr.size());
 
+					//Eliminando de la tabla de particiones
+					int removidos = 0;	//lleva el control de los removidos para reposicionar "i".
+					int filas = modeloTabla.getRowCount();
+					//Eliminando de la tabla de particiones
+					for (int j = 0; j < filas; j++) {
+						if((int)modeloTabla.getValueAt(j-removidos, 1) == PID) {
+							modeloTabla.removeRow(j-removidos);
+							removidos++;
+						}
+					}
+					
 					return true;	
 				}
 			}
@@ -261,28 +320,16 @@ public class ParticionesDinamicas {
 				}
 			}
 			
-			//System.out.println("pos1: " +pos1);			//******************
-			//System.out.println("pos2: " + pos2);			/*******************
 			//Mueve la primera particion libre hasta una posicion antes de la segunda particion y borra la posicion antigua
 			particionesAr.get(pos1).setInicio(particionesAr.get(pos2).getInicio()-particionesAr.get(pos1).getTamano());
 			particionesAr.add(pos2, particionesAr.get(pos1));
 			particionesAr.remove(pos1);
-			System.out.println("ARRAYLISTA");
-			imprimirAr();
+
 
 			for (int i = pos1; i<pos2-1; i++) {
 				particionesAr.get(i).setInicio(particionesAr.get(i-1).getInicio()+particionesAr.get(i-1).getTamano());	
-				System.out.println("ARRAYLISTA - For");
-				imprimirAr();
+
 			}
-			/*
-			for (int i = pos1+1; i<pos2; i++) {
-				particionesAr.add(i-1, particionesAr.get(i));
-				particionesAr.get(i-1).setInicio(particionesAr.get(i-2).getInicio()+particionesAr.get(i-2).getTamano());
-				particionesAr.remove(i);	
-				System.out.println("ARRAYLISTA - For");
-				imprimirAr();
-			}*/
 			
 			//Asigna tamaño y posicion de inicio a la particion nueva y borra la segunda particion antigua
 			particionesAr.get(pos2-1).setTamano(particionesAr.get(pos2-1).getTamano()+particionesAr.get(pos2).getTamano());
@@ -360,6 +407,14 @@ public class ParticionesDinamicas {
 
 	public void setMemTotalLibre(int memTotalLibre) {
 		this.memTotalLibre = memTotalLibre;
+	}
+
+	public DefaultTableModel getModeloTabla() {
+		return modeloTabla;
+	}
+
+	public void setModeloTabla(DefaultTableModel modeloTabla) {
+		this.modeloTabla = modeloTabla;
 	}
 
 }

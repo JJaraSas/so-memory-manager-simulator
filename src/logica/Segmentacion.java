@@ -236,9 +236,7 @@ public class Segmentacion {
 		int noEliminados = 0;
 
 		for(int i=1; i<particiones.length; i++) {
-			System.out.println("Length: " + particiones.length);
-			System.out.println("For no. "+ i);
-			System.out.println("------");
+			
 			if(particiones[i].getDisponible() == false) {
 
 				if(particiones[i].getProceso().getPID() == PID) {
@@ -269,10 +267,7 @@ public class Segmentacion {
 					}
 					memTotalLibre = memTotalLibre + tamProceso;
 					arrayListToArray();
-					//System.out.println("Arreglo en borrado: " + particionesAr.size());
-					System.out.println("No. "+ i);
-					imprimir();
-					System.out.println("------");
+					
 					eliminado = true;
 					noEliminados++;
 					//reinicia y para verificar nuevamente (no se estaba eliminando la pila)

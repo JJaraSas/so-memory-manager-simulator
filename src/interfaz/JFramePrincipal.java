@@ -1,5 +1,6 @@
 package interfaz;
 
+import javax.imageio.ImageIO;
 import javax.swing.ButtonGroup;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -8,6 +9,8 @@ import javax.swing.JLabel;
 
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.Image;
+
 import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
@@ -16,8 +19,6 @@ import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.table.DefaultTableModel;
-
 import logica.Particion;
 import logica.Proceso;
 import logica.ProcesosDisponibles;
@@ -26,6 +27,7 @@ import javax.swing.JTextPane;
 import java.awt.Label;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 
 import javax.swing.JToggleButton;
@@ -34,7 +36,6 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.SwingConstants;
 import javax.swing.JTable;
-import javax.swing.JTextField;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 
@@ -47,7 +48,6 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	private int asignacion = 1;			//Algoritmos de asignacion
 	private int tamOcupado = 0;			//label tamaño ocupado
 	private boolean compactacion = false;	//Compactacion activa/no activa
-	private int valorDatos = 0;			//control del valor de los segmentos (para segmentacion)
 	
 	private JPanel panelPrincipal;
 	
@@ -98,6 +98,7 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	private JList<String> listaActivos;
 	private JButton btnAdd;
 	private JButton btnQuit;
+	private JLabel lblStarIcon;
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JFramePrincipal() {
@@ -230,11 +231,16 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		panelPrincipal.add(panelMemoria);
 		panelMemoria.setLayout(null);
 		
-		lblTitulo = new Label("Modelo de asignacion");
+		lblTitulo = new Label("Gesti\u00F3n de Memoria");
 		lblTitulo.setFont(new Font("Dialog", Font.BOLD, 16));
 		lblTitulo.setAlignment(Label.CENTER);
 		lblTitulo.setBounds(5, 5, 566, 29);
 		panelMemoria.add(lblTitulo);
+		
+		lblStarIcon = new JLabel("");
+		lblStarIcon.setIcon(new ImageIcon(JFramePrincipal.class.getResource("/img/start.png")));
+		lblStarIcon.setBounds(88, 40, 420, 286);
+		panelMemoria.add(lblStarIcon);
 		
 		//dibujoProcesos();
 	}
@@ -278,6 +284,52 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		lblFinMemoria.setBounds(525, 315, 45, 13);
 		panelMemoria.add(lblFinMemoria);
 		
+		//Crea la tabla de procesos para PartEstaFijas
+		if(modelo == 1 ) {
+			
+			tablaProcesos = new JTable(dibujoProcesos.getParticionesEstFijas().getModeloTabla());
+			
+			scrollTabla = new JScrollPane();
+			scrollTabla.setViewportView(tablaProcesos);
+			scrollTabla.setBounds(256, 67, 299, 138);
+			panelMemoria.add(scrollTabla);
+			
+			lblTablaProcesos = new JLabel("Tabla De Particiones");
+			lblTablaProcesos.setHorizontalAlignment(SwingConstants.CENTER);
+			lblTablaProcesos.setBounds(260, 45, 296, 13);
+			panelMemoria.add(lblTablaProcesos);
+		}
+		
+		if(modelo == 2) {
+			
+			tablaProcesos = new JTable(dibujoProcesos.getParticionesEstVariables().getModeloTabla());
+			
+			scrollTabla = new JScrollPane();
+			scrollTabla.setViewportView(tablaProcesos);
+			scrollTabla.setBounds(256, 67, 299, 138);
+			panelMemoria.add(scrollTabla);
+			
+			lblTablaProcesos = new JLabel("Tabla De Particiones");
+			lblTablaProcesos.setHorizontalAlignment(SwingConstants.CENTER);
+			lblTablaProcesos.setBounds(260, 45, 296, 13);
+			panelMemoria.add(lblTablaProcesos);
+		}
+		
+		if(modelo == 3) {
+			
+			tablaProcesos = new JTable(dibujoProcesos.getParticionesDinamicas().getModeloTabla());
+			
+			scrollTabla = new JScrollPane();
+			scrollTabla.setViewportView(tablaProcesos);
+			scrollTabla.setBounds(256, 67, 299, 138);
+			panelMemoria.add(scrollTabla);
+			
+			lblTablaProcesos = new JLabel("Tabla De Particiones");
+			lblTablaProcesos.setHorizontalAlignment(SwingConstants.CENTER);
+			lblTablaProcesos.setBounds(260, 45, 296, 13);
+			panelMemoria.add(lblTablaProcesos);
+		}
+		
 		//Crea la tabla de procesos para Paginacion
 		if(modelo == 4) {
 			
@@ -285,10 +337,10 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 			
 			scrollTabla = new JScrollPane();
 			scrollTabla.setViewportView(tablaProcesos);
-			scrollTabla.setBounds(261, 67, 294, 138);
+			scrollTabla.setBounds(256, 67, 299, 138);
 			panelMemoria.add(scrollTabla);
 			
-			lblTablaProcesos = new JLabel("Tabla De Procesos");
+			lblTablaProcesos = new JLabel("Tabla De Paginas");
 			lblTablaProcesos.setHorizontalAlignment(SwingConstants.CENTER);
 			lblTablaProcesos.setBounds(260, 45, 296, 13);
 			panelMemoria.add(lblTablaProcesos);
@@ -300,10 +352,10 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 			
 			scrollTabla = new JScrollPane();
 			scrollTabla.setViewportView(tablaProcesos);
-			scrollTabla.setBounds(261, 67, 294, 138);
+			scrollTabla.setBounds(256, 67, 299, 138);
 			panelMemoria.add(scrollTabla);
 			
-			lblTablaProcesos = new JLabel("Tabla De Procesos");
+			lblTablaProcesos = new JLabel("Tabla De Segmentos");
 			lblTablaProcesos.setHorizontalAlignment(SwingConstants.CENTER);
 			lblTablaProcesos.setBounds(260, 45, 296, 13);
 			panelMemoria.add(lblTablaProcesos);
@@ -328,18 +380,28 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 			spnDatos.setBounds(130, 196, 47, 17);
 			panelProcesos.add(spnDatos);
 			
+			//Para paginacion permite controlar los valores que se introducen en los Jtexfield
 			spnDatos.addChangeListener(new ChangeListener() {
 				@Override
 				public void stateChanged(ChangeEvent e) {
 					JSpinner spnDatos2 = (JSpinner)e.getSource();
-					valorDatos = (int)spnDatos2.getValue();
-					Proceso proce = new ProcesosDisponibles().getDisponibles()[listaProcesos.getSelectedIndex()];
-					if((int)spnDatos2.getValue() > proce.getTamano()) {
-						spnDatos.setValue(proce.getTamano()-10);
-						JOptionPane.showMessageDialog(panelPrincipal, "Se exedio el tamaño del proceso seleccionado.");
+					if(listaProcesos.getSelectedIndex() == -1)
+						JOptionPane.showMessageDialog(panelPrincipal, "Seleccione proceso.");
+					else {
+						Proceso proce = new ProcesosDisponibles().getDisponibles()[listaProcesos.getSelectedIndex()];
+						if((int)spnDatos2.getValue() > proce.getTamano()) {
+							spnDatos.setValue(proce.getTamano()-10);
+							JOptionPane.showMessageDialog(panelPrincipal, "Se exedio el tamaño del proceso seleccionado.");
+						}
+						if((int)spnDatos2.getValue() <= 0) {
+							JOptionPane.showMessageDialog(panelPrincipal, "Valor invalido.");
+							if((int)spnCodigo.getValue() > 10)
+								spnDatos.setValue(proce.getTamano() - (int)spnCodigo.getValue());
+							else
+								spnDatos.setValue(10);
+						}
+						spnCodigo.setValue(proce.getTamano() - (int)spnDatos.getValue());
 					}
-					spnCodigo.setValue(proce.getTamano() - (int)spnDatos.getValue());
-						
 				}
 			});
 
@@ -347,13 +409,23 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 				@Override
 				public void stateChanged(ChangeEvent e) {
 					JSpinner spnCodigo2 = (JSpinner)e.getSource();
-					valorDatos = (int)spnCodigo2.getValue();
-					Proceso proce = new ProcesosDisponibles().getDisponibles()[listaProcesos.getSelectedIndex()];
-					if((int)spnCodigo2.getValue() > proce.getTamano()) {
-						spnCodigo.setValue(proce.getTamano()-10);
-						JOptionPane.showMessageDialog(panelPrincipal, "Se exedio el tamaño del proceso seleccionado.");
+					if(listaProcesos.getSelectedIndex() == -1)
+						JOptionPane.showMessageDialog(panelPrincipal, "Seleccione proceso.");
+					else {
+						Proceso proce = new ProcesosDisponibles().getDisponibles()[listaProcesos.getSelectedIndex()];
+						if((int)spnCodigo2.getValue() > proce.getTamano()) {
+							spnCodigo.setValue(proce.getTamano()-10);
+							JOptionPane.showMessageDialog(panelPrincipal, "Se exedio el tamaño del proceso seleccionado.");
+						}
+						if((int)spnCodigo2.getValue() <= 0) {
+							JOptionPane.showMessageDialog(panelPrincipal, "Valor invalido.");
+							if((int)spnDatos.getValue() > 10)
+								spnCodigo.setValue(proce.getTamano() - (int)spnDatos.getValue());
+							else
+								spnCodigo.setValue(10);
+						}
+						spnDatos.setValue(proce.getTamano() - (int)spnCodigo.getValue());
 					}
-					spnDatos.setValue(proce.getTamano() - (int)spnCodigo.getValue());
 						
 				}
 			});
@@ -405,6 +477,7 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 			JToggleButton tglbON_OFF = (JToggleButton)event.getSource();
 			
             if(tglbON_OFF.isSelected()){
+            	lblStarIcon.setVisible(false);
             	
             	//Modelo seleccionado
             	if(rdbtnPEstaticaFijas.isSelected())
@@ -532,7 +605,7 @@ public class JFramePrincipal extends JFrame implements ActionListener{
         	if (seSelecciono != -1 ) {
     			//Extraer PID del proceso seleccionado
     			String seleccionado = listaActivos.getSelectedValue();
-    			System.out.println("Eliminando: "+ seleccionado + "SeSelecciono: " + seSelecciono);
+    			
     			int indice = seleccionado.indexOf("PID:");
     			int PID = Integer.parseInt(seleccionado.substring(indice+4, seleccionado.length()));
     			
