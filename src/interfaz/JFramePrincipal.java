@@ -9,10 +9,14 @@ import javax.swing.JLabel;
 import java.awt.Color;
 import java.awt.Font;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.table.DefaultTableModel;
 
 import logica.Particion;
 import logica.Proceso;
@@ -29,6 +33,10 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.SwingConstants;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JSpinner;
+import javax.swing.SpinnerNumberModel;
 
 @SuppressWarnings("serial")
 public class JFramePrincipal extends JFrame implements ActionListener{
@@ -39,6 +47,7 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	private int asignacion = 1;			//Algoritmos de asignacion
 	private int tamOcupado = 0;			//label tamaño ocupado
 	private boolean compactacion = false;	//Compactacion activa/no activa
+	private int valorDatos = 0;			//control del valor de los segmentos (para segmentacion)
 	
 	private JPanel panelPrincipal;
 	
@@ -47,6 +56,10 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	private JLabel lblProcesosDisp;
 	private JScrollPane scrollLista;
 	private JList<String> listaProcesos;
+	private JLabel lblSegCodigo;
+	private JSpinner spnCodigo;
+	private JLabel lblSegDatos;
+	private JSpinner spnDatos;
 	
 	private JPanel panelModMemoria;
 	private ButtonGroup btgModMemoria;
@@ -61,6 +74,7 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	private JRadioButton rdbtnPeorAjuste;
 	private JCheckBox chckbxCompactacion;
 	private JRadioButton rdbtnPaginacion;
+	private JRadioButton rdbtnSegmentacion;
 	
 	private JPanel panelMensajes;
 	private JTextPane textMensajes;
@@ -75,6 +89,9 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	private PanelDibujoProc dibujoProcesos;
 	private JLabel lblInicioMem;
 	private JLabel lblFinMemoria;
+	private JTable tablaProcesos;
+	private JScrollPane scrollTabla;
+	private JLabel lblTablaProcesos;
 	
 	private JLabel lblprocesosActivos;
 	private JScrollPane scrollActivos;
@@ -82,6 +99,7 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	private JButton btnAdd;
 	private JButton btnQuit;
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public JFramePrincipal() {
 		setTitle("Simulador Gestor de Memoria");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -109,7 +127,7 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		
 		lblProcesosDisp = new JLabel("Proc. Disponibles");
 		lblProcesosDisp.setFont(new Font("Tahoma", Font.BOLD, 11));
-		lblProcesosDisp.setBounds(10, 50, 142, 13);
+		lblProcesosDisp.setBounds(10, 55, 142, 13);
 		panelProcesos.add(lblProcesosDisp);
 		
 		listaProcesos = new JList(generarListaProcesos());
@@ -138,24 +156,29 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		rdbtnPEstaticasVariables.setBounds(10, 55, 152, 29);
 		panelModMemoria.add(rdbtnPEstaticasVariables);
 		
-		rdbtnPDinamicas = new JRadioButton("Particiones Dinamicas");
+		rdbtnPDinamicas = new JRadioButton("<html>Particiones Dinamicas</html>");
 		rdbtnPDinamicas.setBounds(10, 86, 152, 21);
 		panelModMemoria.add(rdbtnPDinamicas);
 		
-		chckbxCompactacion = new JCheckBox("Compactaci\u00F3n");
+		chckbxCompactacion = new JCheckBox("<html>Compactaci\u00F3n</html>");
 		chckbxCompactacion.setFont(new Font("Tahoma", Font.PLAIN, 11));
 		chckbxCompactacion.setBounds(35, 109, 127, 21);
 		panelModMemoria.add(chckbxCompactacion);
 		
-		rdbtnPaginacion = new JRadioButton("Paginacion");
-		rdbtnPaginacion.setBounds(10, 132, 103, 21);
+		rdbtnPaginacion = new JRadioButton("<html>Paginaci\u00F3n</html>");
+		rdbtnPaginacion.setBounds(10, 132, 152, 21);
 		panelModMemoria.add(rdbtnPaginacion);
+		
+		rdbtnSegmentacion = new JRadioButton("<html>Segmentaci\u00F3n</html>");
+		rdbtnSegmentacion.setBounds(10, 155, 152, 21);
+		panelModMemoria.add(rdbtnSegmentacion);
 		
 		btgModMemoria = new ButtonGroup();
 		btgModMemoria.add(rdbtnPEstaticaFijas);
 		btgModMemoria.add(rdbtnPEstaticasVariables);
 		btgModMemoria.add(rdbtnPDinamicas);
 		btgModMemoria.add(rdbtnPaginacion);
+		btgModMemoria.add(rdbtnSegmentacion);
 		
 		//Panel Algoritmo Asignacion
 		panelAsignacion = new JPanel();
@@ -217,8 +240,9 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	}
 	
 	//Dibujar particiones
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public void dibujoProcesos() {
-			
+		
 		//Proccesos en memoria dibujo
 		lblMemoriaPrincipalpal = new JLabel("Memoria Principal");
 		lblMemoriaPrincipalpal.setBounds(25, 207, 126, 13);
@@ -239,6 +263,7 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		panelMemoria.add(lblKB);
 		
 		dibujoMemoria = dibujoProcesos.getDibujoMemLibre();
+		dibujoMemoria.setBounds(45, 45, 80, 150);
 		panelMemoria.add(dibujoMemoria);
 		
 		lblInicioMem = new JLabel("0 KB");
@@ -252,12 +277,93 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		lblFinMemoria.setHorizontalAlignment(SwingConstants.CENTER);
 		lblFinMemoria.setBounds(525, 315, 45, 13);
 		panelMemoria.add(lblFinMemoria);
-		dibujoMemoria.setBounds(45, 45, 80, 150);
 		
+		//Crea la tabla de procesos para Paginacion
+		if(modelo == 4) {
+			
+			tablaProcesos = new JTable(dibujoProcesos.getPaginacion().getModeloTabla());
+			
+			scrollTabla = new JScrollPane();
+			scrollTabla.setViewportView(tablaProcesos);
+			scrollTabla.setBounds(261, 67, 294, 138);
+			panelMemoria.add(scrollTabla);
+			
+			lblTablaProcesos = new JLabel("Tabla De Procesos");
+			lblTablaProcesos.setHorizontalAlignment(SwingConstants.CENTER);
+			lblTablaProcesos.setBounds(260, 45, 296, 13);
+			panelMemoria.add(lblTablaProcesos);
+		}
+		
+		if (modelo == 5) {
+			
+			tablaProcesos = new JTable(dibujoProcesos.getSegmentacion().getModeloTabla());
+			
+			scrollTabla = new JScrollPane();
+			scrollTabla.setViewportView(tablaProcesos);
+			scrollTabla.setBounds(261, 67, 294, 138);
+			panelMemoria.add(scrollTabla);
+			
+			lblTablaProcesos = new JLabel("Tabla De Procesos");
+			lblTablaProcesos.setHorizontalAlignment(SwingConstants.CENTER);
+			lblTablaProcesos.setBounds(260, 45, 296, 13);
+			panelMemoria.add(lblTablaProcesos);
+			
+			lblSegDatos = new JLabel("Datos:");
+			lblSegDatos.setFont(new Font("Tahoma", Font.BOLD, 10));
+			lblSegDatos.setBounds(94, 197, 37, 13);
+			panelProcesos.add(lblSegDatos);
+			
+			spnCodigo = new JSpinner();
+			spnCodigo.setModel(new SpinnerNumberModel(Integer.valueOf(0), null, null, Integer.valueOf(1)));
+			spnCodigo.setToolTipText("Tama\u00F1o del Segmento de Codigo (KB)");
+			spnCodigo.setFont(new Font("Tahoma", Font.PLAIN, 10));
+			spnCodigo.setBounds(45, 196, 47, 17);
+			//spnCodigo.add
+			panelProcesos.add(spnCodigo);
+			
+			spnDatos = new JSpinner();
+			spnDatos.setModel(new SpinnerNumberModel(Integer.valueOf(0), null, null, Integer.valueOf(1)));
+			spnDatos.setFont(new Font("Tahoma", Font.PLAIN, 10));
+			spnDatos.setToolTipText("<html>Tama\u00F1o del Segmento de Datos (KB)</br>Valor minimo 10KB</html>");
+			spnDatos.setBounds(130, 196, 47, 17);
+			panelProcesos.add(spnDatos);
+			
+			spnDatos.addChangeListener(new ChangeListener() {
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					JSpinner spnDatos2 = (JSpinner)e.getSource();
+					valorDatos = (int)spnDatos2.getValue();
+					Proceso proce = new ProcesosDisponibles().getDisponibles()[listaProcesos.getSelectedIndex()];
+					if((int)spnDatos2.getValue() > proce.getTamano()) {
+						spnDatos.setValue(proce.getTamano()-10);
+						JOptionPane.showMessageDialog(panelPrincipal, "Se exedio el tamaño del proceso seleccionado.");
+					}
+					spnCodigo.setValue(proce.getTamano() - (int)spnDatos.getValue());
+						
+				}
+			});
+
+			spnCodigo.addChangeListener(new ChangeListener() {
+				@Override
+				public void stateChanged(ChangeEvent e) {
+					JSpinner spnCodigo2 = (JSpinner)e.getSource();
+					valorDatos = (int)spnCodigo2.getValue();
+					Proceso proce = new ProcesosDisponibles().getDisponibles()[listaProcesos.getSelectedIndex()];
+					if((int)spnCodigo2.getValue() > proce.getTamano()) {
+						spnCodigo.setValue(proce.getTamano()-10);
+						JOptionPane.showMessageDialog(panelPrincipal, "Se exedio el tamaño del proceso seleccionado.");
+					}
+					spnDatos.setValue(proce.getTamano() - (int)spnCodigo.getValue());
+						
+				}
+			});
+			
+		}
+	
 		//Lista de procesos activos
 		lblprocesosActivos = new JLabel("Procesos Activos");
 		lblprocesosActivos.setFont(new Font("Tahoma", Font.BOLD, 11));
-		lblprocesosActivos.setBounds(10, 215, 160, 13);
+		lblprocesosActivos.setBounds(10, 220, 160, 13);
 		panelProcesos.add(lblprocesosActivos);
 		
 		btnAdd = new JButton("Add");
@@ -282,6 +388,12 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		scrollActivos.setViewportView(listaActivos);
 		scrollActivos.setBounds(10, 240, 160, 100);
 		panelProcesos.add(scrollActivos);
+		
+		lblSegCodigo = new JLabel("Codigo:");
+		lblSegCodigo.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblSegCodigo.setBounds(5, 197, 45, 13);
+		panelProcesos.add(lblSegCodigo);
+		
 	}
 	
 	//Manejo eventos
@@ -303,6 +415,8 @@ public class JFramePrincipal extends JFrame implements ActionListener{
             		modelo = 3;
             	else if(rdbtnPaginacion.isSelected())
             		modelo = 4;
+            	else if(rdbtnSegmentacion.isSelected())
+            		modelo = 5;
             	
             	//Metodo de asignacion
             	if(rdbtnPrimerAjuste.isSelected())
@@ -324,6 +438,8 @@ public class JFramePrincipal extends JFrame implements ActionListener{
             		lblTitulo.setText("Particiones Dinamicas");
             	}else if(modelo == 4) {
             		lblTitulo.setText("Paginación");
+            	}else if(modelo == 5) {
+            		lblTitulo.setText("Segmentación");
             	}
             	
             	desabilitarIniciado();
@@ -371,17 +487,25 @@ public class JFramePrincipal extends JFrame implements ActionListener{
             		agregado = dibujoProcesos.getParticionesEstFijas().añadirProceso(proceso, asignacion);
             	}else if(modelo == 2) {
             		agregado = dibujoProcesos.getParticionesEstVariables().añadirProceso(proceso, asignacion);
-            	}else {
+            	}else if(modelo == 3){
             		agregado = dibujoProcesos.getParticionesDinamicas().añadirProceso(proceso, asignacion, compactacion);
             		//Se agrega para que se actualice el dibujo de memoria libre
             		dibujoProcesos.getDibujoMemLibre().setParticiones(dibujoProcesos.getParticionesDinamicas().getParticiones());
-            		dibujoProcesos.getParticionesDinamicas().imprimir();
+            	}else if(modelo == 4) {
+            		agregado = dibujoProcesos.getPaginacion().añadirProceso(proceso);
+            	}else if(modelo == 5) {
+            		if((int)spnCodigo.getValue() < proceso.getTamano() & (int)spnDatos.getValue() < proceso.getTamano())
+            			agregado = dibujoProcesos.getSegmentacion().añadirProceso(proceso, (int)spnCodigo.getValue(), (int)spnDatos.getValue());
+            		else
+            			agregado = false;
+            		//Se agrega para que se actualice el dibujo de memoria libre
+            		dibujoProcesos.getDibujoMemLibre().setParticiones(dibujoProcesos.getSegmentacion().getParticiones());
             	}
             	
             	if(agregado)
             		mensaje = mensaje + "\n" + proceso.getNombre() + " - PID:" + proceso.getPID() + " agregado.";
             	else
-            		mensaje = mensaje + "\nProceso no agregado (Sin memoria o excede tamaño de particiones)";
+            		mensaje = mensaje + "\nProceso no agregado (Sin memoria, excede tamaño de particiones o segmentos no validos)";
             	textMensajes.setText(mensaje);
             	
             	actualizarActivos();
@@ -421,6 +545,12 @@ public class JFramePrincipal extends JFrame implements ActionListener{
             		eliminado = dibujoProcesos.getParticionesDinamicas().eliminarProceso(PID);
             		//Se agrega para que se actualice el dibujo de memoria libre
             		dibujoProcesos.getDibujoMemLibre().setParticiones(dibujoProcesos.getParticionesDinamicas().getParticiones());
+            	}else if (modelo == 4) {
+            		eliminado = dibujoProcesos.getPaginacion().eliminarProceso(PID);
+            	}else if (modelo == 5) {
+            		eliminado = dibujoProcesos.getSegmentacion().eliminarProceso(PID);
+            		//Se agrega para que se actualice el dibujo de memoria libre
+            		dibujoProcesos.getDibujoMemLibre().setParticiones(dibujoProcesos.getSegmentacion().getParticiones());
             	}
         		
         		
@@ -455,6 +585,8 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 			activos = generarListaActivos(dibujoProcesos.getParticionesDinamicas().getParticiones());
 		else if (modelo == 4)
 			activos = generarListaActivos(dibujoProcesos.getPaginacion().getParticiones());
+		else if (modelo == 5)
+			activos = generarListaActivos(dibujoProcesos.getSegmentacion().getParticiones());
 	}
 	
 	/**
@@ -480,18 +612,31 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		
 		ArrayList<String> lista = new ArrayList<String>();
 		
+		boolean existe = false;
+		//int PID = Integer.parseInt(seleccionado.substring(indice+4, seleccionado.length()));
+
 		for(int i = 0; i<particiones.length; i++) {
 			if(particiones[i].getDisponible()==false) {
-				lista.add(particiones[i].getProceso().getNombre()
-						  + " (" + particiones[i].getProceso().getTamano() + "KB)"
-						  + " PID:" + particiones[i].getProceso().getPID());
+				//Verifica que el proceso aun no este en lista(en paginacion se repiten procesos por las paginas)
+				for(int j=0; j<lista.size();j++) {
+					int indice = lista.get(j).indexOf("PID:");
+					if(particiones[i].getProceso().getPID() == Integer.parseInt(lista.get(j).substring(indice+4, lista.get(j).length())) )
+						existe = true;
+				}
+				if(existe == false) {
+					lista.add(particiones[i].getProceso().getNombre()
+							  + " (" + particiones[i].getProceso().getTamano() + "KB)"
+							  + " PID:" + particiones[i].getProceso().getPID());
+				}
 			}
+			existe = false;
 		}
 		//Canversion ArrayList en Array
 		String[] listaActivos = lista.toArray(new String[0]);
 		
 		return listaActivos;
 	}
+	
 	
 	/**
 	 * Desabilitar paneles que no deben estar activos
@@ -501,6 +646,8 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 		rdbtnPEstaticasVariables.setEnabled(false);
 		rdbtnPDinamicas.setEnabled(false);
 		chckbxCompactacion.setEnabled(false);
+		rdbtnPaginacion.setEnabled(false);
+		rdbtnSegmentacion.setEnabled(false);
 		
 		rdbtnPrimerAjuste.setEnabled(false);
 		rdbtnMejorAjuste.setEnabled(false);
@@ -514,6 +661,10 @@ public class JFramePrincipal extends JFrame implements ActionListener{
 	public void habilitarDetenido() {
 		rdbtnPEstaticaFijas.setEnabled(true);
 		rdbtnPEstaticasVariables.setEnabled(true);
+		rdbtnPDinamicas.setEnabled(true);
+		chckbxCompactacion.setEnabled(true);
+		rdbtnPaginacion.setEnabled(true);
+		rdbtnSegmentacion.setEnabled(true);
 		
 		rdbtnPrimerAjuste.setEnabled(true);
 		rdbtnMejorAjuste.setEnabled(true);

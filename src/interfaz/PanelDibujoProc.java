@@ -5,8 +5,6 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseMotionListener;
-
 import javax.swing.JPanel;
 import javax.swing.UIManager;
 
@@ -14,6 +12,7 @@ import logica.Paginacion;
 import logica.ParticionesDinamicas;
 import logica.ParticionesEstFijas;
 import logica.ParticionesEstVariables;
+import logica.Segmentacion;
 
 @SuppressWarnings("serial")
 public class PanelDibujoProc extends JPanel{
@@ -41,6 +40,7 @@ public class PanelDibujoProc extends JPanel{
 	private ParticionesEstVariables particionesEstVariables;
 	private ParticionesDinamicas particionesDinamicas;
 	private Paginacion paginacion;
+	private Segmentacion segmentacion;
 	
 	/**
 	 * Pintar el recuadro de procesos en memoria
@@ -263,6 +263,67 @@ public class PanelDibujoProc extends JPanel{
         	}
     	}
     	
+    	//Modelo Segmentacion
+    	if(modelo == 5) {
+        	
+        	int pos = 0; 	//Llava la posicion de donde se va a dibujar
+        	g.setFont(new Font("Tahoma", Font.BOLD, 7));		//Tamaño del texto en el dibujo
+        	
+        	//Calculando tamaño del S.O. para ser dibujada
+        	double tamanoSO = (segmentacion.getSO().getTamano()*100.0)/segmentacion.getMemoriaPpal();
+        	int drawSO = (int) (getWidth()*(tamanoSO/100));
+
+        	g.setColor(amarillo);
+        	g.fillRect(pos, 0, drawSO, getHeight());
+        	g.setColor(negro);
+        	g.drawRect(pos, 0, drawSO, getHeight()-1);
+        	
+        	g.drawString(segmentacion.getParticiones()[0].getProceso().getNombre(), 5, (getHeight()*2)/5);
+        	g.drawString("PID=" + segmentacion.getParticiones()[0].getProceso().getPID(), 5, ((getHeight()*4)/5));
+        	
+        	pos = pos + drawSO;
+        	
+        	//Recorrer el arreglo de particiones para ir dibujando cada una
+        	for(int i=1; i<segmentacion.getParticiones().length;i++) {
+        		
+        		int tamDibujo = cacularTamDibujo(i);
+        		int tamProceso = 0;
+  
+        		g.setColor(verde);
+        		
+        		//Verificar si hay proceso en la particion, si lo hay calcular el tamaño
+        		if(segmentacion.getParticiones()[i].getDisponible() == true)
+        			tamProceso = 0;	
+        		else
+        			tamProceso = cacularTamProceso(i);
+
+            	g.fillRect(pos, 0, tamDibujo, getHeight());	//Pintar particion
+            	
+            	if (tamProceso != 0) {		//Si la particion tiene proceso pintar proceso segun el segmento
+            		if(segmentacion.getParticiones()[i].isCodigo())
+            			g.setColor( (Color)segmentacion.getParticiones()[i].getProceso().getSegCodigo()[2]);
+            		
+            		if(segmentacion.getParticiones()[i].isDatos())
+            			g.setColor( (Color)segmentacion.getParticiones()[i].getProceso().getSegDatos()[2]);
+            		
+            		if(segmentacion.getParticiones()[i].isPila())
+            			g.setColor( (Color)segmentacion.getParticiones()[i].getProceso().getSegPila()[2]);
+            		
+            		g.fillRect(pos, 0, tamProceso, getHeight());
+            	}
+            	
+            	g.setColor(negro);			//Pintar borde
+            	g.drawRect(pos, 0, tamDibujo, getHeight()-1);
+            	
+            	if(segmentacion.getParticiones()[i].getDisponible() == false) {
+                	g.drawString(segmentacion.getParticiones()[i].getProceso().getNombre(), pos+5, (getHeight()*2)/5);
+                	g.drawString("PID=" + segmentacion.getParticiones()[i].getProceso().getPID(), pos+5, ((getHeight()*4)/5));
+                	//g.drawString("T: " + partcionesEstFijas.getParticiones()[0].getTamano() + "KB", 5, (getHeight()*3)/5);
+            	}
+            	pos = pos + tamDibujo;		//Se suma el area dibujada a la posiscion
+        	}
+    	}
+    	
     }
 
     //Inicia la valriable del modelo
@@ -275,6 +336,8 @@ public class PanelDibujoProc extends JPanel{
     		particionesDinamicas = new ParticionesDinamicas(asignacion);
     	else if(modelo == 4)
     		paginacion = new Paginacion();
+    	else if(modelo == 5)
+    		segmentacion = new Segmentacion();
     }
     
     public void iniciarDibujoMemLibre() {
@@ -287,6 +350,8 @@ public class PanelDibujoProc extends JPanel{
     		dibujoMemLibre = new PanelDibujoMem(particionesDinamicas.getParticiones(), particionesDinamicas.getMemoriaPpal());
     	else if(modelo == 4)
     		dibujoMemLibre = new PanelDibujoMem(paginacion.getParticiones(),paginacion.getMemoriaPpal());
+    	else if(modelo == 5)
+    		dibujoMemLibre = new PanelDibujoMem(segmentacion.getParticiones(),segmentacion.getMemoriaPpal());
     		
     }
     
@@ -310,6 +375,10 @@ public class PanelDibujoProc extends JPanel{
     		return draw;
     	}else if(modelo == 4) {
     		double tamano = (paginacion.getParticiones()[posicion].getTamano()*100.0)/paginacion.getMemoriaPpal();
+        	int draw = (int) (getWidth()*(tamano/100));
+    		return draw;
+    	}else if(modelo == 5) {
+    		double tamano = (segmentacion.getParticiones()[posicion].getTamano()*100.0)/segmentacion.getMemoriaPpal();
         	int draw = (int) (getWidth()*(tamano/100));
     		return draw;
     	}else {
@@ -337,7 +406,13 @@ public class PanelDibujoProc extends JPanel{
         	int draw = (int) (getWidth()*(tamProceso/100));
     		return draw;
     	}else if(modelo == 4) {
-    		double tamProceso = (paginacion.getParticiones()[posicion].getProceso().getTamano()*100.0)/paginacion.getMemoriaPpal();
+    		//Para este modelo se toma el tamaño de la particion no del proceso
+    		double tamProceso = (paginacion.getParticiones()[posicion].getTamano()*100.0)/paginacion.getMemoriaPpal();
+        	int draw = (int) (getWidth()*(tamProceso/100));
+    		return draw;
+    	}else if(modelo == 5) {
+    		//Para este modelo se toma el tamaño de la particion no del proceso
+    		double tamProceso = (segmentacion.getParticiones()[posicion].getTamano()*100.0)/segmentacion.getMemoriaPpal();
         	int draw = (int) (getWidth()*(tamProceso/100));
     		return draw;
     	}else {
@@ -346,8 +421,8 @@ public class PanelDibujoProc extends JPanel{
     	
     }
     
+    //Muestra el tooltip con la informacion de la particion
 	public String getToolTipText(MouseEvent e) {
-		
 		String texto= "";
 		//Si el area sobre la que esta el mouse no es el area de dibujo returna null
 		if(getMousePosition() != null) {	
@@ -358,7 +433,7 @@ public class PanelDibujoProc extends JPanel{
 			int posXMouse = this.getMousePosition().x;
 			
 			if(modelo == 1) {
-	    		
+				
 				do{
 					cont++;
 					//el area de dibujo puede tener algunos pixeles mas que el area dibujada asi que si el 
@@ -386,7 +461,7 @@ public class PanelDibujoProc extends JPanel{
 					UIManager.put("ToolTip.background", particionesEstFijas.getParticiones()[cont].getProceso().getColor());
 				}else {
 					texto =  texto + "<b>Libre</b>";
-					texto = texto + "<br/><b>Tamaño Particion:</b> " + particionesEstVariables.getParticiones()[cont].getTamano() + "KB";
+					texto = texto + "<br/><b>Tamaño Particion:</b> " + particionesEstFijas.getParticiones()[cont].getTamano() + "KB";
 					UIManager.put("ToolTip.background", verde);
 				}
 				texto = texto + "<br /><b>Inicio:</b> " + particionesEstFijas.getParticiones()[cont].getInicio() + " KB<br/><b>Fin: </b>"
@@ -445,7 +520,7 @@ public class PanelDibujoProc extends JPanel{
 						finPar = (inicioPar + cacularTamDibujo(cont));
 					}
 				}while( posXMouse < inicioPar ||  posXMouse > finPar);
-				
+	    		
 				texto = "<html>";
 				
 				if(particionesDinamicas.getParticiones()[cont].getDisponible()==false) {
@@ -461,8 +536,8 @@ public class PanelDibujoProc extends JPanel{
 				}
 				texto = texto + "<br/><b>Inicio:</b> " + particionesDinamicas.getParticiones()[cont].getInicio() + " KB<br/><b>Fin:</b> "
 						+ (particionesDinamicas.getParticiones()[cont].getInicio() + particionesDinamicas.getParticiones()[cont].getTamano() - 1) + " KB</html>";
-	    		
-	    	}if(modelo == 4) {
+				
+	    	}else if(modelo == 4) {
 	    		
 				do{
 					cont++;
@@ -496,6 +571,50 @@ public class PanelDibujoProc extends JPanel{
 				}
 				texto = texto + "<br /><b>Inicio:</b> " + paginacion.getParticiones()[cont].getInicio() + " KB<br/><b>Fin: </b>"
 						+ (paginacion.getParticiones()[cont].getInicio() + paginacion.getParticiones()[cont].getTamano() - 1) + " KB</html>";
+	    	
+	    	}else if(modelo == 5) {
+	    		
+				do{
+					cont++;
+					//el area de dibujo puede tener algunos pixeles mas que el area dibujada asi que si el 
+					//contador se pasa lo regresa para evitar error de posicion que no existe
+					if(cont >= segmentacion.getParticiones().length)
+						cont--;
+
+					//Si la posicion es la 0 el inicio es 0
+					if(cont <= 0) {
+						inicioPar = 0;
+						finPar = (inicioPar + cacularTamDibujo(cont));
+					}else {
+						inicioPar = (finPar);
+						finPar = (inicioPar + cacularTamDibujo(cont));
+					}
+				}while( posXMouse < inicioPar ||  posXMouse > finPar);
+				
+				texto = "<html>";
+				
+				if(segmentacion.getParticiones()[cont].getDisponible()==false) {
+					texto = texto + "<b>Proceso:</b> " + segmentacion.getParticiones()[cont].getProceso().getNombre();
+					texto = texto + "<br/><b>PID:</b> " + segmentacion.getParticiones()[cont].getProceso().getPID();
+					texto = texto + "<br/><b>Tamaño Particion:</b> " + segmentacion.getParticiones()[cont].getTamano() + "KB";
+					String segmento = "";
+					if(segmentacion.getParticiones()[cont].isCodigo())
+						segmento = "Codigo";
+					else if(segmentacion.getParticiones()[cont].isDatos())
+						segmento = "Datos";
+					else if(segmentacion.getParticiones()[cont].isPila())
+						segmento = "Pila";
+					
+					texto = texto + "<br/><b>Segmento:</b> " + segmento;
+					
+					UIManager.put("ToolTip.background", segmentacion.getParticiones()[cont].getProceso().getColor());
+				}else {
+					texto =  texto + "<b>Libre</b>";
+					texto = texto + "<br/><b>Tamaño Particion:</b> " + segmentacion.getParticiones()[cont].getTamano() + "KB";
+					UIManager.put("ToolTip.background", verde);
+				}
+				texto = texto + "<br /><b>Inicio:</b> " + segmentacion.getParticiones()[cont].getInicio() + " KB<br/><b>Fin: </b>"
+						+ (segmentacion.getParticiones()[cont].getInicio() + segmentacion.getParticiones()[cont].getTamano() - 1) + " KB</html>";
 	    	}else {
 	    		return "";
 	    	}
@@ -541,6 +660,14 @@ public class PanelDibujoProc extends JPanel{
 
 	public void setPaginacion(Paginacion paginacion) {
 		this.paginacion = paginacion;
+	}
+
+	public Segmentacion getSegmentacion() {
+		return segmentacion;
+	}
+
+	public void setSegmentacion(Segmentacion segmentacion) {
+		this.segmentacion = segmentacion;
 	}
 
 	public PanelDibujoMem getDibujoMemLibre() {

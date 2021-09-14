@@ -27,8 +27,7 @@ public class PanelDibujoMem extends JPanel{
 	
 	public void paint(Graphics g) {
 		double tamanoOcupPorcen = (calcularTamOcupado()*100.0)/memoriaPpal;
-		System.out.println("TamañoOcupado:"+ tamanoOcupPorcen);
-		imprimir();
+		
 		int drawOcupado = (int) (getHeight()*(tamanoOcupPorcen/100));
 		
     	g.setColor(verde);
@@ -45,7 +44,7 @@ public class PanelDibujoMem extends JPanel{
 	 * Calcula el tamaño de la memoria ocupada
 	 * @return
 	 */
-	public int calcularTamOcupado() {	
+	public int calcularTamOcupado() {
 		int tam = 0;
 		for(int i=0; i<particiones.length; i++) {
 			if(particiones[i].getDisponible() == false) {

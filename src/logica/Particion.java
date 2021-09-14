@@ -19,6 +19,10 @@ public class Particion {
 	private int tamano;
 	private Proceso proceso;
 	private int inicio;
+	//Para segmentacion
+	private boolean esDatos = false;
+	private boolean esCodigo = false;
+	private boolean esPila = false;
 	
 	//Getter y setter
 	public int getId() {
@@ -51,5 +55,27 @@ public class Particion {
 	public void setInicio(int inicio) {
 		this.inicio = inicio;
 	}
+
+	public boolean isDatos() {
+		return esDatos;
+	}
+
+	public void setEsDatos(boolean esDatos) {
+		this.esDatos = esDatos;
+	}
+
+	public boolean isCodigo() {
+		return esCodigo;
+	}
+	public void setEsCodigo(boolean esCodigo) {
+		this.esCodigo = esCodigo;
+	}
+	public boolean isPila() {
+		return esPila;
+	}
+	public void setEsPila(boolean esPila) {
+		this.esPila = esPila;
+	}
+	
 
 }

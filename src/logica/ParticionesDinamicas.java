@@ -10,7 +10,8 @@ public class ParticionesDinamicas {
 		dividirMemoria();
 	}
 	
-	//Contador que permite asignar PID a cada proceso / En este modelo contadorPID+1 servira para identificar la particion
+	//Contador que permite asignar PID a cada proceso 
+	// En este modelo contadorPID+1 servira para identificar la particion
 	int contadorPID = 1;
 	//Metodo de asignacion
 	int asignacion = 0;
@@ -194,8 +195,7 @@ public class ParticionesDinamicas {
 		
 		boolean anteriorLib = false;
 		int tamProceso = 0;
-		System.out.println("Arreglo antes borrado: " + particionesAr.size());
-		imprimirAr();
+
 		for(int i=1; i<particiones.length; i++) {
 			if(particiones[i].getDisponible() == false) {
 				
@@ -228,7 +228,7 @@ public class ParticionesDinamicas {
 					memTotalLibre = memTotalLibre + tamProceso;
 					arrayListToArray();
 					System.out.println("Arreglo en borrado: " + particionesAr.size());
-					imprimirAr();
+
 					return true;	
 				}
 			}
